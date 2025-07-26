@@ -9,97 +9,97 @@
       "test": "Health Check",
       "success": true,
       "message": "API is healthy: Character VR RP API is running",
-      "timestamp": "2025-07-26T12:11:02.352331",
+      "timestamp": "2025-07-26T12:17:29.332799",
       "details": null
     },
     {
       "test": "Create User",
       "success": true,
-      "message": "User created successfully with ID: 72159e90-265e-4484-9d77-3b28a75e5fbc",
-      "timestamp": "2025-07-26T12:11:02.919114",
+      "message": "User created successfully with ID: 3fe39f7e-e6b5-4b22-a4c1-fd5dd2e5257e",
+      "timestamp": "2025-07-26T12:17:29.889419",
       "details": null
     },
     {
       "test": "Get User",
       "success": true,
       "message": "User retrieved successfully: alice_wonderland",
-      "timestamp": "2025-07-26T12:11:03.477566",
+      "timestamp": "2025-07-26T12:17:30.444458",
       "details": null
     },
     {
       "test": "Create Character",
       "success": false,
       "message": "Character creation failed with status 401: {\"detail\":\"Not authenticated\"}",
-      "timestamp": "2025-07-26T12:11:04.035954",
+      "timestamp": "2025-07-26T12:17:30.994569",
       "details": null
     },
     {
       "test": "Get Characters",
       "success": true,
       "message": "Retrieved 0 characters",
-      "timestamp": "2025-07-26T12:11:04.590504",
+      "timestamp": "2025-07-26T12:17:31.554538",
       "details": null
     },
     {
       "test": "Get Character by ID",
       "success": false,
       "message": "No character_id available from previous test",
-      "timestamp": "2025-07-26T12:11:05.091884",
+      "timestamp": "2025-07-26T12:17:32.056049",
       "details": null
     },
     {
       "test": "Create Conversation",
       "success": false,
       "message": "Missing user_id or character_id for conversation creation",
-      "timestamp": "2025-07-26T12:11:05.592027",
+      "timestamp": "2025-07-26T12:17:32.556191",
       "details": null
     },
     {
       "test": "Get User Conversations",
       "success": true,
       "message": "Retrieved 0 conversations",
-      "timestamp": "2025-07-26T12:11:06.143566",
+      "timestamp": "2025-07-26T12:17:33.104893",
       "details": null
     },
     {
       "test": "AI Providers",
       "success": true,
       "message": "Retrieved 3 AI providers, OpenAI is available",
-      "timestamp": "2025-07-26T12:11:06.697127",
+      "timestamp": "2025-07-26T12:17:33.658220",
       "details": null
     },
     {
       "test": "AI Chat",
       "success": false,
       "message": "No conversation_id available for chat testing",
-      "timestamp": "2025-07-26T12:11:07.198483",
+      "timestamp": "2025-07-26T12:17:34.159692",
       "details": null
     },
     {
       "test": "Get Conversation Messages",
       "success": false,
       "message": "No conversation_id available for getting messages",
-      "timestamp": "2025-07-26T12:11:07.698620",
+      "timestamp": "2025-07-26T12:17:34.659824",
       "details": null
     },
     {
       "test": "Multi-turn Conversation",
       "success": false,
       "message": "No conversation_id available for multi-turn test",
-      "timestamp": "2025-07-26T12:11:08.198761",
+      "timestamp": "2025-07-26T12:17:35.159956",
       "details": null
     },
     {
       "test": "Different Chat Modes",
       "success": false,
       "message": "Missing user_id or character_id for mode testing",
-      "timestamp": "2025-07-26T12:11:08.698902",
+      "timestamp": "2025-07-26T12:17:35.660092",
       "details": null
     }
   ],
   "test_data": {
-    "user_id": "72159e90-265e-4484-9d77-3b28a75e5fbc",
+    "user_id": "3fe39f7e-e6b5-4b22-a4c1-fd5dd2e5257e",
     "username": "alice_wonderland",
-    "email": "alice.wonderland.b6823cb9@example.com"
+    "email": "alice.wonderland.c889f79b@example.com"
   }
 }
