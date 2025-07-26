@@ -8,7 +8,7 @@ import {
   LogIn, 
   Zap, 
   Gamepad2,
-  VrIcon,
+  Glasses,
   Sparkles,
   Globe,
   Users,
