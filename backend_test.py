@@ -893,54 +893,124 @@ class BackendTester:
             self.log_test("Set Default Persona", False, f"Set default persona error: {str(e)}")
             return False
     
-    def test_chat_with_persona_context(self):
-        """Test chat endpoint with persona context"""
+    def test_persona_ai_chat_integration(self):
+        """Test AI chat with persona context integration"""
         try:
-            # Use mock IDs for testing endpoint structure
-            chat_data = {
-                "conversation_id": "test_conversation_id_123",
-                "message": "Hello! I'm Alex, an adventurous explorer. Tell me about your world!",
-                "ai_provider": "openai",
-                "ai_model": "gpt-4.1",
-                "persona_id": "test_persona_id_123"
+            if "user_id" not in self.test_data or "character_id" not in self.test_data:
+                self.log_test("Persona AI Chat Integration", False, "Missing user_id or character_id from previous tests")
+                return False
+            
+            # Access database to create test persona and session
+            import sys
+            sys.path.append('/app/backend')
+            
+            from pymongo import MongoClient
+            import os
+            from dotenv import load_dotenv
+            import uuid
+            from datetime import datetime
+            
+            load_dotenv('/app/backend/.env')
+            MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/character_vr_rp')
+            client = MongoClient(MONGO_URL)
+            db = client.get_default_database()
+            
+            user_id = self.test_data["user_id"]
+            character_id = self.test_data["character_id"]
+            
+            # Create a test persona
+            persona_id = str(uuid.uuid4())
+            test_persona = {
+                "persona_id": persona_id,
+                "user_id": user_id,
+                "name": "Alex the Explorer",
+                "description": "An adventurous and curious person who loves exploring new worlds",
+                "personality_traits": "Adventurous, curious, brave, friendly, optimistic",
+                "avatar": None,
+                "preferences": {"theme": "adventure"},
+                "is_default": True,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
             }
             
-            auth_headers = self.get_auth_headers()
+            db.personas.insert_one(test_persona)
+            
+            # Create a new conversation for persona testing
+            conversation_id = str(uuid.uuid4())
+            test_conversation = {
+                "conversation_id": conversation_id,
+                "user_id": user_id,
+                "character_id": character_id,
+                "room_id": None,
+                "title": "Persona AI Chat Test",
+                "mode": "rp",
+                "is_nsfw": False,
+                "ai_provider": "openai",
+                "ai_model": "gpt-4o-mini",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            db.conversations.insert_one(test_conversation)
+            
+            # Create a test session
+            session_id = str(uuid.uuid4())
+            test_session = {
+                "session_id": session_id,
+                "user_id": user_id,
+                "session_token": "test_token_persona",
+                "expires_at": datetime.utcnow() + timedelta(hours=1),
+                "created_at": datetime.utcnow()
+            }
+            
+            db.sessions.insert_one(test_session)
+            
+            # Test AI chat with persona context
+            chat_data = {
+                "conversation_id": conversation_id,
+                "message": "Hello Luna! I'm Alex, an adventurous explorer. I'd love to learn about your mystical world!",
+                "ai_provider": "openai",
+                "ai_model": "gpt-4o-mini",
+                "persona_id": persona_id
+            }
+            
+            auth_headers = HEADERS.copy()
+            auth_headers["X-Session-ID"] = session_id
+            
+            print("   Testing AI chat with persona context...")
             response = requests.post(f"{BASE_URL}/chat", 
                                    json=chat_data, 
                                    headers=auth_headers,
-                                   timeout=10)
+                                   timeout=30)
             
-            # Since we don't have valid authentication, we expect 401
-            if response.status_code == 401:
-                self.log_test("Chat with Persona Context", True, "Chat endpoint exists and correctly requires authentication. Persona context parameter accepted.")
-                return True
-            elif response.status_code == 404:
-                self.log_test("Chat with Persona Context", True, "Chat endpoint exists and correctly handles non-existent conversation/persona")
-                return True
-            elif response.status_code == 200:
-                # If somehow authentication worked, test the response
+            if response.status_code == 200:
                 data = response.json()
                 ai_response = data.get("ai_response")
                 persona_used = data.get("persona_used")
                 
                 if ai_response and persona_used:
                     ai_content = ai_response.get("content", "")
-                    if len(ai_content) > 10:
-                        self.log_test("Chat with Persona Context", True, f"Chat with persona context successful. Persona: {persona_used.get('name')}", 
-                                    f"AI response preview: {ai_content[:100]}...")
+                    persona_name = persona_used.get("name", "")
+                    
+                    if len(ai_content) > 10 and persona_name == "Alex the Explorer":
+                        self.log_test("Persona AI Chat Integration", True, 
+                                    f"AI chat with persona context successful. Persona: {persona_name}", 
+                                    f"AI Response preview: {ai_content[:100]}...")
                         return True
                     else:
-                        self.log_test("Chat with Persona Context", False, "AI response too short")
+                        self.log_test("Persona AI Chat Integration", False, 
+                                    f"AI response too short or persona mismatch. Persona: {persona_name}")
                         return False
                 else:
-                    self.log_test("Chat with Persona Context", False, "Missing ai_response or persona_used in chat response")
+                    self.log_test("Persona AI Chat Integration", False, "Missing ai_response or persona_used in response")
                     return False
             else:
-                self.log_test("Chat with Persona Context", False, f"Chat with persona failed with status {response.status_code}: {response.text}")
+                self.log_test("Persona AI Chat Integration", False, 
+                            f"Persona AI chat failed with status {response.status_code}: {response.text}")
                 return False
+                
         except Exception as e:
-            self.log_test("Chat with Persona Context", False, f"Chat with persona error: {str(e)}")
+            self.log_test("Persona AI Chat Integration", False, f"Persona AI chat integration error: {str(e)}")
             return False
     
     def test_delete_persona_protection(self):
