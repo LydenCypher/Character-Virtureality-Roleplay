@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -6,17 +6,18 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import json
 import asyncio
+import httpx
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="AI Character Interaction API", version="1.0.0")
+app = FastAPI(title="Character VR RP API", version="2.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -28,7 +29,7 @@ app.add_middleware(
 )
 
 # MongoDB connection
-MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/ai_character_app')
+MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/character_vr_rp')
 client = MongoClient(MONGO_URL)
 db = client.get_default_database()
 
@@ -37,6 +38,8 @@ users_collection = db.users
 characters_collection = db.characters
 conversations_collection = db.conversations
 messages_collection = db.messages
+sessions_collection = db.sessions
+multiplayer_rooms_collection = db.multiplayer_rooms
 
 # Security
 security = HTTPBearer()
@@ -66,9 +69,19 @@ class User(BaseModel):
     user_id: str
     username: str
     email: str
+    provider: str = "email"  # email, discord, google, apple, phone
+    provider_id: Optional[str] = None
+    avatar: Optional[str] = None
     preferences: Dict[str, Any] = {}
     created_at: datetime
     updated_at: datetime
+
+class Session(BaseModel):
+    session_id: str
+    user_id: str
+    session_token: str
+    expires_at: datetime
+    created_at: datetime
 
 class Character(BaseModel):
     character_id: str
@@ -80,7 +93,22 @@ class Character(BaseModel):
     ai_model: str = "gpt-4.1"
     system_prompt: str
     is_nsfw: bool = False
+    is_multiplayer: bool = False
     created_by: str
+    created_at: datetime
+    updated_at: datetime
+
+class MultiplayerRoom(BaseModel):
+    room_id: str
+    name: str
+    description: str
+    host_user_id: str
+    character_id: str
+    max_participants: int = 10
+    participants: List[str] = []
+    is_active: bool = True
+    is_private: bool = False
+    password: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
@@ -88,6 +116,7 @@ class Conversation(BaseModel):
     conversation_id: str
     user_id: str
     character_id: str
+    room_id: Optional[str] = None  # For multiplayer
     title: str
     mode: str = "casual"  # casual, rp, rpg
     is_nsfw: bool = False
@@ -99,7 +128,9 @@ class Conversation(BaseModel):
 class Message(BaseModel):
     message_id: str
     conversation_id: str
+    room_id: Optional[str] = None
     sender: str  # user or character
+    sender_id: str
     content: str
     timestamp: datetime
     ai_provider: Optional[str] = None
@@ -107,6 +138,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     conversation_id: str
+    room_id: Optional[str] = None
     message: str
     ai_provider: Optional[str] = "openai"
     ai_model: Optional[str] = "gpt-4.1"
@@ -120,14 +152,27 @@ class CreateCharacterRequest(BaseModel):
     ai_model: str = "gpt-4.1"
     system_prompt: str
     is_nsfw: bool = False
+    is_multiplayer: bool = False
 
 class CreateConversationRequest(BaseModel):
     character_id: str
+    room_id: Optional[str] = None
     title: str
     mode: str = "casual"
     is_nsfw: bool = False
     ai_provider: str = "openai"
     ai_model: str = "gpt-4.1"
+
+class CreateRoomRequest(BaseModel):
+    name: str
+    description: str
+    character_id: str
+    max_participants: int = 10
+    is_private: bool = False
+    password: Optional[str] = None
+
+class AuthCallbackRequest(BaseModel):
+    session_id: str
 
 # Helper functions
 def get_api_key(provider: str) -> str:
@@ -137,13 +182,12 @@ def get_api_key(provider: str) -> str:
     elif provider == "anthropic":
         return ANTHROPIC_API_KEY
     elif provider == "gemini":
-        # Add Gemini API key when provided
         return os.environ.get('GEMINI_API_KEY')
     return None
 
 def create_character_system_prompt(character: dict, mode: str = "casual") -> str:
     """Create a system prompt for the character based on mode"""
-    base_prompt = f"""You are {character['name']}, a character with the following traits:
+    base_prompt = f"""You are {character['name']}, a character in Character VR RP with the following traits:
 
 Description: {character['description']}
 Personality: {character['personality']}
@@ -153,35 +197,141 @@ Custom Instructions: {character.get('system_prompt', '')}
 """
     
     if mode == "rp":
-        base_prompt += """You are engaging in roleplay. Stay in character, be creative, and respond as if you are this character in a story or scene. Use descriptive language and actions in your responses."""
+        base_prompt += """You are engaging in roleplay. Stay in character, be creative, and respond as if you are this character in a story or scene. Use descriptive language and actions in your responses. This is a VR environment, so you can describe virtual actions and interactions."""
     elif mode == "rpg":
-        base_prompt += """You are in an RPG-style interaction. Think of this as a role-playing game where you can describe actions, environments, and consequences. Be engaging and interactive, allowing the user to make choices that affect the story."""
+        base_prompt += """You are in an RPG-style interaction. Think of this as a role-playing game where you can describe actions, environments, and consequences. Be engaging and interactive, allowing the user to make choices that affect the story. This is a VR environment with multiplayer capabilities."""
     elif mode == "casual":
-        base_prompt += """You are having a casual conversation. Be friendly, engaging, and stay true to your character's personality while having a natural chat."""
+        base_prompt += """You are having a casual conversation. Be friendly, engaging, and stay true to your character's personality while having a natural chat. This is a VR environment where users can interact with you."""
     
     if character.get('is_nsfw', False):
         base_prompt += "\n\nNote: This character supports mature/NSFW content when appropriate to the conversation."
     
+    if character.get('is_multiplayer', False):
+        base_prompt += "\n\nNote: This is a multiplayer environment. Multiple users may be present. Address users appropriately and be aware of group dynamics."
+    
     return base_prompt
+
+async def verify_session(session_id: str) -> Optional[dict]:
+    """Verify session with Emergent Auth API"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": session_id}
+            )
+            if response.status_code == 200:
+                return response.json()
+            return None
+    except Exception as e:
+        print(f"Session verification error: {e}")
+        return None
+
+async def get_current_user(x_session_id: str = Header(None)) -> Optional[dict]:
+    """Get current user from session"""
+    if not x_session_id:
+        return None
+    
+    # Check local session
+    session = sessions_collection.find_one({"session_id": x_session_id})
+    if session and session["expires_at"] > datetime.utcnow():
+        user = users_collection.find_one({"user_id": session["user_id"]}, {"_id": 0})
+        return user
+    
+    return None
 
 # Health check
 @app.get("/api/health")
 async def health_check():
-    return {"status": "healthy", "message": "AI Character Interaction API is running"}
+    return {"status": "healthy", "message": "Character VR RP API is running"}
+
+# Authentication endpoints
+@app.post("/api/auth/callback")
+async def auth_callback(request: AuthCallbackRequest):
+    """Handle authentication callback from Emergent Auth"""
+    try:
+        # Verify session with Emergent Auth
+        session_data = await verify_session(request.session_id)
+        if not session_data:
+            raise HTTPException(status_code=401, detail="Invalid session")
+        
+        # Create or update user
+        user_id = session_data.get("id")
+        email = session_data.get("email")
+        name = session_data.get("name")
+        picture = session_data.get("picture")
+        session_token = session_data.get("session_token")
+        
+        # Check if user exists
+        existing_user = users_collection.find_one({"email": email})
+        if not existing_user:
+            # Create new user
+            user = User(
+                user_id=user_id,
+                username=name,
+                email=email,
+                provider="emergent",
+                provider_id=user_id,
+                avatar=picture,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+            users_collection.insert_one(user.dict())
+        else:
+            user_id = existing_user["user_id"]
+        
+        # Create session
+        session = Session(
+            session_id=request.session_id,
+            user_id=user_id,
+            session_token=session_token,
+            expires_at=datetime.utcnow() + timedelta(days=7),
+            created_at=datetime.utcnow()
+        )
+        sessions_collection.insert_one(session.dict())
+        
+        return {"message": "Authentication successful", "user_id": user_id}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication error: {str(e)}")
+
+@app.post("/api/auth/phone")
+async def phone_auth(phone_number: str):
+    """Handle phone number authentication (placeholder)"""
+    # This would integrate with a service like Twilio for SMS verification
+    return {"message": "Phone authentication not implemented yet", "phone_number": phone_number}
+
+@app.get("/api/auth/discord")
+async def discord_auth():
+    """Redirect to Discord OAuth"""
+    # This would redirect to Discord OAuth
+    return {"url": "https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=identify email"}
+
+@app.get("/api/auth/google")
+async def google_auth():
+    """Redirect to Google OAuth"""
+    # This would redirect to Google OAuth
+    return {"url": "https://accounts.google.com/oauth2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=openid email profile"}
+
+@app.get("/api/auth/apple")
+async def apple_auth():
+    """Redirect to Apple OAuth"""
+    # This would redirect to Apple OAuth
+    return {"url": "https://appleid.apple.com/auth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=name email"}
 
 # User management
 @app.post("/api/users")
 async def create_user(username: str, email: str):
+    """Legacy user creation endpoint"""
     user_id = str(uuid.uuid4())
     user = User(
         user_id=user_id,
         username=username,
         email=email,
+        provider="legacy",
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
     
-    # Check if user already exists
     existing_user = users_collection.find_one({"email": email})
     if existing_user:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -196,9 +346,19 @@ async def get_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+@app.get("/api/users/me")
+async def get_current_user_info(current_user: dict = Depends(get_current_user)):
+    """Get current user information"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return current_user
+
 # Character management
 @app.post("/api/characters")
-async def create_character(character_data: CreateCharacterRequest, user_id: str):
+async def create_character(character_data: CreateCharacterRequest, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     character_id = str(uuid.uuid4())
     character = Character(
         character_id=character_id,
@@ -210,7 +370,8 @@ async def create_character(character_data: CreateCharacterRequest, user_id: str)
         ai_model=character_data.ai_model,
         system_prompt=character_data.system_prompt,
         is_nsfw=character_data.is_nsfw,
-        created_by=user_id,
+        is_multiplayer=character_data.is_multiplayer,
+        created_by=current_user["user_id"],
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()
     )
@@ -219,8 +380,12 @@ async def create_character(character_data: CreateCharacterRequest, user_id: str)
     return {"character_id": character_id, "message": "Character created successfully"}
 
 @app.get("/api/characters")
-async def get_characters(skip: int = 0, limit: int = 20):
-    characters = list(characters_collection.find({}, {"_id": 0}).skip(skip).limit(limit))
+async def get_characters(skip: int = 0, limit: int = 20, multiplayer_only: bool = False):
+    filter_query = {}
+    if multiplayer_only:
+        filter_query["is_multiplayer"] = True
+    
+    characters = list(characters_collection.find(filter_query, {"_id": 0}).skip(skip).limit(limit))
     return {"characters": characters}
 
 @app.get("/api/characters/{character_id}")
@@ -230,14 +395,94 @@ async def get_character(character_id: str):
         raise HTTPException(status_code=404, detail="Character not found")
     return character
 
+# Multiplayer room management
+@app.post("/api/rooms")
+async def create_room(room_data: CreateRoomRequest, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    room_id = str(uuid.uuid4())
+    room = MultiplayerRoom(
+        room_id=room_id,
+        name=room_data.name,
+        description=room_data.description,
+        host_user_id=current_user["user_id"],
+        character_id=room_data.character_id,
+        max_participants=room_data.max_participants,
+        participants=[current_user["user_id"]],
+        is_private=room_data.is_private,
+        password=room_data.password,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    
+    multiplayer_rooms_collection.insert_one(room.dict())
+    return {"room_id": room_id, "message": "Room created successfully"}
+
+@app.get("/api/rooms")
+async def get_rooms(skip: int = 0, limit: int = 20):
+    rooms = list(multiplayer_rooms_collection.find({"is_active": True, "is_private": False}, {"_id": 0}).skip(skip).limit(limit))
+    return {"rooms": rooms}
+
+@app.get("/api/rooms/{room_id}")
+async def get_room(room_id: str):
+    room = multiplayer_rooms_collection.find_one({"room_id": room_id}, {"_id": 0})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    return room
+
+@app.post("/api/rooms/{room_id}/join")
+async def join_room(room_id: str, password: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    room = multiplayer_rooms_collection.find_one({"room_id": room_id})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    if room["is_private"] and room["password"] != password:
+        raise HTTPException(status_code=403, detail="Invalid password")
+    
+    if len(room["participants"]) >= room["max_participants"]:
+        raise HTTPException(status_code=403, detail="Room is full")
+    
+    if current_user["user_id"] not in room["participants"]:
+        multiplayer_rooms_collection.update_one(
+            {"room_id": room_id},
+            {"$push": {"participants": current_user["user_id"]}, "$set": {"updated_at": datetime.utcnow()}}
+        )
+    
+    return {"message": "Joined room successfully"}
+
+@app.post("/api/rooms/{room_id}/leave")
+async def leave_room(room_id: str, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    room = multiplayer_rooms_collection.find_one({"room_id": room_id})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+    
+    if current_user["user_id"] in room["participants"]:
+        multiplayer_rooms_collection.update_one(
+            {"room_id": room_id},
+            {"$pull": {"participants": current_user["user_id"]}, "$set": {"updated_at": datetime.utcnow()}}
+        )
+    
+    return {"message": "Left room successfully"}
+
 # Conversation management
 @app.post("/api/conversations")
-async def create_conversation(conversation_data: CreateConversationRequest, user_id: str):
+async def create_conversation(conversation_data: CreateConversationRequest, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     conversation_id = str(uuid.uuid4())
     conversation = Conversation(
         conversation_id=conversation_id,
-        user_id=user_id,
+        user_id=current_user["user_id"],
         character_id=conversation_data.character_id,
+        room_id=conversation_data.room_id,
         title=conversation_data.title,
         mode=conversation_data.mode,
         is_nsfw=conversation_data.is_nsfw,
@@ -260,23 +505,38 @@ async def get_conversation_messages(conversation_id: str):
     messages = list(messages_collection.find({"conversation_id": conversation_id}, {"_id": 0}).sort("timestamp", 1))
     return {"messages": messages}
 
+@app.get("/api/rooms/{room_id}/messages")
+async def get_room_messages(room_id: str):
+    messages = list(messages_collection.find({"room_id": room_id}, {"_id": 0}).sort("timestamp", 1))
+    return {"messages": messages}
+
 # AI Chat endpoint
 @app.post("/api/chat")
-async def chat(chat_request: ChatRequest):
+async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     try:
-        # Get conversation details
-        conversation = conversations_collection.find_one({"conversation_id": chat_request.conversation_id})
-        if not conversation:
-            raise HTTPException(status_code=404, detail="Conversation not found")
+        # Get conversation or room details
+        if chat_request.room_id:
+            room = multiplayer_rooms_collection.find_one({"room_id": chat_request.room_id})
+            if not room:
+                raise HTTPException(status_code=404, detail="Room not found")
+            character = characters_collection.find_one({"character_id": room["character_id"]})
+            context_id = chat_request.room_id
+        else:
+            conversation = conversations_collection.find_one({"conversation_id": chat_request.conversation_id})
+            if not conversation:
+                raise HTTPException(status_code=404, detail="Conversation not found")
+            character = characters_collection.find_one({"character_id": conversation["character_id"]})
+            context_id = chat_request.conversation_id
         
-        # Get character details
-        character = characters_collection.find_one({"character_id": conversation["character_id"]})
         if not character:
             raise HTTPException(status_code=404, detail="Character not found")
         
-        # Use conversation's AI settings or request settings
-        ai_provider = chat_request.ai_provider or conversation.get("ai_provider", "openai")
-        ai_model = chat_request.ai_model or conversation.get("ai_model", "gpt-4.1")
+        # Use request AI settings
+        ai_provider = chat_request.ai_provider or "openai"
+        ai_model = chat_request.ai_model or "gpt-4.1"
         
         # Get API key
         api_key = get_api_key(ai_provider)
@@ -288,19 +548,25 @@ async def chat(chat_request: ChatRequest):
         user_message = Message(
             message_id=user_message_id,
             conversation_id=chat_request.conversation_id,
+            room_id=chat_request.room_id,
             sender="user",
+            sender_id=current_user["user_id"],
             content=chat_request.message,
             timestamp=datetime.utcnow()
         )
         messages_collection.insert_one(user_message.dict())
         
         # Create system prompt based on character and mode
-        system_prompt = create_character_system_prompt(character, conversation.get("mode", "casual"))
+        mode = "casual"  # Default mode
+        if not chat_request.room_id:
+            mode = conversation.get("mode", "casual")
+        
+        system_prompt = create_character_system_prompt(character, mode)
         
         # Create AI chat instance
         chat_instance = LlmChat(
             api_key=api_key,
-            session_id=chat_request.conversation_id,
+            session_id=context_id,
             system_message=system_prompt
         ).with_model(ai_provider, ai_model)
         
@@ -313,7 +579,9 @@ async def chat(chat_request: ChatRequest):
         ai_message = Message(
             message_id=ai_message_id,
             conversation_id=chat_request.conversation_id,
+            room_id=chat_request.room_id,
             sender="character",
+            sender_id=character["character_id"],
             content=ai_response,
             timestamp=datetime.utcnow(),
             ai_provider=ai_provider,
@@ -355,14 +623,12 @@ async def update_conversation_ai_settings(conversation_id: str, ai_provider: str
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     
-    # Validate provider and model
     if ai_provider not in AVAILABLE_MODELS:
         raise HTTPException(status_code=400, detail=f"Invalid AI provider: {ai_provider}")
     
     if ai_model not in AVAILABLE_MODELS[ai_provider]["models"]:
         raise HTTPException(status_code=400, detail=f"Invalid model for {ai_provider}: {ai_model}")
     
-    # Update conversation
     conversations_collection.update_one(
         {"conversation_id": conversation_id},
         {"$set": {"ai_provider": ai_provider, "ai_model": ai_model, "updated_at": datetime.utcnow()}}
