@@ -63,6 +63,21 @@ function AppContent() {
               <CharacterCreator />
             </ProtectedRoute>
           } />
+          <Route path="/personas" element={
+            <ProtectedRoute>
+              <PersonaList />
+            </ProtectedRoute>
+          } />
+          <Route path="/create-persona" element={
+            <ProtectedRoute>
+              <PersonaCreator />
+            </ProtectedRoute>
+          } />
+          <Route path="/edit-persona/:personaId" element={
+            <ProtectedRoute>
+              <PersonaCreator />
+            </ProtectedRoute>
+          } />
           <Route path="/chat/:conversationId" element={
             <ProtectedRoute>
               <Chat />
