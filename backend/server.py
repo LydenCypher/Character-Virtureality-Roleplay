@@ -405,6 +405,10 @@ async def create_user(username: str, email: str):
         raise HTTPException(status_code=400, detail="User already exists")
     
     users_collection.insert_one(user.dict())
+    
+    # Create default persona for new user
+    await create_default_persona(user_id, username)
+    
     return {"user_id": user_id, "message": "User created successfully"}
 
 @app.get("/api/users/{user_id}")
