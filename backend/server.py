@@ -336,8 +336,16 @@ async def auth_callback(request: AuthCallbackRequest):
                 updated_at=datetime.utcnow()
             )
             users_collection.insert_one(user.dict())
+            
+            # Create default persona for new user
+            await create_default_persona(user_id, name)
         else:
             user_id = existing_user["user_id"]
+            
+            # Check if user has any personas, if not create default
+            persona_count = personas_collection.count_documents({"user_id": user_id})
+            if persona_count == 0:
+                await create_default_persona(user_id, existing_user.get("username", "User"))
         
         # Create session
         session = Session(
