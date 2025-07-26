@@ -9,168 +9,168 @@
       "test": "Health Check",
       "success": true,
       "message": "API is healthy: Character VR RP API is running",
-      "timestamp": "2025-07-26T12:59:58.880973",
+      "timestamp": "2025-07-26T18:49:38.762420",
       "details": null
     },
     {
       "test": "Create User",
       "success": true,
-      "message": "User created successfully with ID: 9356ec47-503a-46fe-831a-af516689524e",
-      "timestamp": "2025-07-26T12:59:59.441869",
+      "message": "User created successfully with ID: 16f7d1ff-a94a-4d1d-82ae-52f2c8018777",
+      "timestamp": "2025-07-26T18:49:39.333090",
       "details": null
     },
     {
       "test": "Get User",
       "success": true,
       "message": "User retrieved successfully: alice_wonderland",
-      "timestamp": "2025-07-26T12:59:59.999319",
+      "timestamp": "2025-07-26T18:49:39.886687",
       "details": null
     },
     {
       "test": "Auth Callback (Invalid Session)",
       "success": false,
       "message": "Auth callback unexpected status 500: {\"detail\":\"Authentication error: \"}",
-      "timestamp": "2025-07-26T13:00:00.664094",
+      "timestamp": "2025-07-26T18:49:40.572404",
       "details": null
     },
     {
       "test": "Create Character (No Auth)",
       "success": true,
       "message": "Character creation correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:01.221540",
+      "timestamp": "2025-07-26T18:49:41.124867",
       "details": null
     },
     {
       "test": "Get Characters",
       "success": true,
       "message": "Retrieved 0 characters",
-      "timestamp": "2025-07-26T13:00:01.774275",
+      "timestamp": "2025-07-26T18:49:41.682483",
       "details": null
     },
     {
       "test": "Get Character by ID",
       "success": false,
       "message": "No character_id available from previous test",
-      "timestamp": "2025-07-26T13:00:02.275559",
+      "timestamp": "2025-07-26T18:49:42.183966",
       "details": null
     },
     {
       "test": "Create Conversation (No Auth)",
       "success": true,
       "message": "Conversation creation correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:02.826613",
+      "timestamp": "2025-07-26T18:49:42.739468",
       "details": null
     },
     {
       "test": "Get User Conversations",
       "success": true,
       "message": "Retrieved 0 conversations",
-      "timestamp": "2025-07-26T13:00:03.383958",
+      "timestamp": "2025-07-26T18:49:43.298505",
       "details": null
     },
     {
       "test": "AI Providers",
       "success": true,
       "message": "Retrieved 3 AI providers, OpenAI is available",
-      "timestamp": "2025-07-26T13:00:03.960745",
+      "timestamp": "2025-07-26T18:49:43.872104",
       "details": null
     },
     {
       "test": "AI Chat (No Auth)",
       "success": true,
       "message": "AI chat correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:04.517338",
+      "timestamp": "2025-07-26T18:49:44.425234",
       "details": null
     },
     {
       "test": "Get Conversation Messages",
       "success": false,
       "message": "No conversation_id available for getting messages",
-      "timestamp": "2025-07-26T13:00:05.018749",
+      "timestamp": "2025-07-26T18:49:44.926830",
       "details": null
     },
     {
       "test": "Multi-turn Conversation",
       "success": false,
       "message": "No conversation_id available for multi-turn test",
-      "timestamp": "2025-07-26T13:00:05.518886",
+      "timestamp": "2025-07-26T18:49:45.426954",
       "details": null
     },
     {
       "test": "Different Chat Modes",
       "success": false,
       "message": "Missing user_id or character_id for mode testing",
-      "timestamp": "2025-07-26T13:00:06.019034",
+      "timestamp": "2025-07-26T18:49:45.927113",
       "details": null
     },
     {
       "test": "Get User Personas (No Auth)",
       "success": true,
       "message": "Personas endpoint correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:06.574766",
+      "timestamp": "2025-07-26T18:49:46.476211",
       "details": null
     },
     {
       "test": "Create Persona",
       "success": true,
       "message": "Persona creation endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:07.127754",
+      "timestamp": "2025-07-26T18:49:47.030219",
       "details": null
     },
     {
       "test": "Get User Personas",
       "success": true,
       "message": "Get personas endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:07.685530",
+      "timestamp": "2025-07-26T18:49:47.585637",
       "details": null
     },
     {
       "test": "Get Specific Persona",
       "success": true,
       "message": "Get specific persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:08.240094",
+      "timestamp": "2025-07-26T18:49:48.137144",
       "details": null
     },
     {
       "test": "Update Persona",
       "success": true,
       "message": "Update persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:08.796472",
+      "timestamp": "2025-07-26T18:49:48.688974",
       "details": null
     },
     {
       "test": "Get Default Persona",
       "success": true,
       "message": "Get default persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:09.372860",
+      "timestamp": "2025-07-26T18:49:49.265768",
       "details": null
     },
     {
       "test": "Set Default Persona",
       "success": true,
       "message": "Set default persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:09.927469",
+      "timestamp": "2025-07-26T18:49:49.819290",
       "details": null
     },
     {
       "test": "Chat with Persona Context",
       "success": true,
       "message": "Chat endpoint exists and correctly requires authentication. Persona context parameter accepted.",
-      "timestamp": "2025-07-26T13:00:10.483731",
+      "timestamp": "2025-07-26T18:49:50.379615",
       "details": null
     },
     {
       "test": "Delete Persona Protection",
       "success": true,
       "message": "Delete persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T13:00:11.037003",
+      "timestamp": "2025-07-26T18:49:50.931949",
       "details": null
     }
   ],
   "test_data": {
-    "user_id": "9356ec47-503a-46fe-831a-af516689524e",
+    "user_id": "16f7d1ff-a94a-4d1d-82ae-52f2c8018777",
     "username": "alice_wonderland",
-    "email": "alice.wonderland.d7200420@example.com",
-    "session_id": "test_session_fe1536f1"
+    "email": "alice.wonderland.ffcef810@example.com",
+    "session_id": "test_session_3bee3053"
   }
 }
