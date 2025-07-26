@@ -1,0 +1,109 @@
+{
+  "summary": {
+    "passed": 9,
+    "failed": 4,
+    "total": 13
+  },
+  "test_results": [
+    {
+      "test": "Health Check",
+      "success": true,
+      "message": "API is healthy: AI Character Interaction API is running",
+      "timestamp": "2025-07-26T09:50:10.185881",
+      "details": null
+    },
+    {
+      "test": "Create User",
+      "success": true,
+      "message": "User created successfully with ID: cc3c0bbf-bd35-441f-8a38-cac2830f0b98",
+      "timestamp": "2025-07-26T09:50:10.724155",
+      "details": null
+    },
+    {
+      "test": "Get User",
+      "success": false,
+      "message": "Get user failed with status 500: Internal Server Error",
+      "timestamp": "2025-07-26T09:50:11.228452",
+      "details": null
+    },
+    {
+      "test": "Create Character",
+      "success": true,
+      "message": "Character created successfully: Luna the Mystic (ID: 2d6b949c-c199-4032-b8a4-67016dd5a52b)",
+      "timestamp": "2025-07-26T09:50:11.745357",
+      "details": null
+    },
+    {
+      "test": "Get Characters",
+      "success": true,
+      "message": "Retrieved 1 characters (including our test character)",
+      "timestamp": "2025-07-26T09:50:12.249696",
+      "details": null
+    },
+    {
+      "test": "Get Character by ID",
+      "success": true,
+      "message": "Character retrieved successfully: Luna the Mystic",
+      "timestamp": "2025-07-26T09:50:12.753758",
+      "details": null
+    },
+    {
+      "test": "Create Conversation",
+      "success": true,
+      "message": "Conversation created successfully: A Mystical Encounter (ID: dc600067-0540-4040-a263-72cadbc79aa3)",
+      "timestamp": "2025-07-26T09:50:13.270330",
+      "details": null
+    },
+    {
+      "test": "Get User Conversations",
+      "success": true,
+      "message": "Retrieved 1 conversations (including our test conversation)",
+      "timestamp": "2025-07-26T09:50:13.774725",
+      "details": null
+    },
+    {
+      "test": "AI Providers",
+      "success": true,
+      "message": "Retrieved 3 AI providers, OpenAI is available",
+      "timestamp": "2025-07-26T09:50:14.277656",
+      "details": null
+    },
+    {
+      "test": "AI Chat",
+      "success": false,
+      "message": "AI chat failed with status 500: {\"detail\":\"Chat error: Failed to generate chat completion: litellm.RateLimitError: RateLimitError: OpenAIException - You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\"}",
+      "timestamp": "2025-07-26T09:50:19.251716",
+      "details": null
+    },
+    {
+      "test": "Get Conversation Messages",
+      "success": true,
+      "message": "Retrieved 1 messages from conversation",
+      "timestamp": "2025-07-26T09:50:19.756499",
+      "details": null
+    },
+    {
+      "test": "Multi-turn Conversation",
+      "success": false,
+      "message": "Multi-turn chat failed with status 500: {\"detail\":\"Chat error: Failed to generate chat completion: litellm.RateLimitError: RateLimitError: OpenAIException - You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\"}",
+      "timestamp": "2025-07-26T09:50:22.323629",
+      "details": null
+    },
+    {
+      "test": "Different Chat Modes",
+      "success": false,
+      "message": "No additional chat modes working",
+      "timestamp": "2025-07-26T09:50:26.205663",
+      "details": null
+    }
+  ],
+  "test_data": {
+    "user_id": "cc3c0bbf-bd35-441f-8a38-cac2830f0b98",
+    "username": "alice_wonderland",
+    "email": "alice.wonderland.772d34a4@example.com",
+    "character_id": "2d6b949c-c199-4032-b8a4-67016dd5a52b",
+    "character_name": "Luna the Mystic",
+    "conversation_id": "dc600067-0540-4040-a263-72cadbc79aa3",
+    "conversation_title": "A Mystical Encounter"
+  }
+}
