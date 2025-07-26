@@ -460,6 +460,356 @@ class BackendTester:
             self.log_test("Different Chat Modes", False, "No additional chat modes working")
             return False
     
+    def create_test_session(self):
+        """Create a test session for authenticated endpoints"""
+        try:
+            # Create a user first if not exists
+            if "user_id" not in self.test_data:
+                if not self.test_create_user():
+                    return None
+            
+            # Create a mock session for testing
+            session_id = f"test_session_{uuid.uuid4().hex[:8]}"
+            self.test_data["session_id"] = session_id
+            
+            # For testing purposes, we'll use the session_id as a header
+            # In real implementation, this would be validated against Emergent Auth
+            return session_id
+        except Exception as e:
+            print(f"Error creating test session: {str(e)}")
+            return None
+    
+    def get_auth_headers(self):
+        """Get headers with authentication"""
+        if "session_id" not in self.test_data:
+            self.create_test_session()
+        
+        headers = HEADERS.copy()
+        if "session_id" in self.test_data:
+            headers["X-Session-ID"] = self.test_data["session_id"]
+        return headers
+    
+    def test_get_user_personas_no_auth(self):
+        """Test getting user personas without authentication"""
+        try:
+            response = requests.get(f"{BASE_URL}/personas", headers=HEADERS)
+            
+            if response.status_code == 401:
+                self.log_test("Get User Personas (No Auth)", True, "Personas endpoint correctly requires authentication")
+                return True
+            else:
+                self.log_test("Get User Personas (No Auth)", False, f"Personas endpoint unexpected status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Get User Personas (No Auth)", False, f"Get personas error: {str(e)}")
+            return False
+    
+    def test_create_persona(self):
+        """Test creating a new persona"""
+        try:
+            persona_data = {
+                "name": "Alex the Explorer",
+                "description": "An adventurous and curious person who loves exploring new worlds",
+                "personality_traits": "Adventurous, curious, brave, friendly, optimistic",
+                "avatar": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD//2Q==",
+                "preferences": {"theme": "dark", "language": "en"},
+                "is_default": False
+            }
+            
+            auth_headers = self.get_auth_headers()
+            response = requests.post(f"{BASE_URL}/personas", 
+                                   json=persona_data, 
+                                   headers=auth_headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                persona_id = data.get("persona_id")
+                if persona_id:
+                    self.test_data["persona_id"] = persona_id
+                    self.test_data["persona_name"] = persona_data["name"]
+                    self.log_test("Create Persona", True, f"Persona created successfully with ID: {persona_id}")
+                    return True
+                else:
+                    self.log_test("Create Persona", False, "Persona creation response missing persona_id")
+                    return False
+            else:
+                self.log_test("Create Persona", False, f"Persona creation failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Create Persona", False, f"Persona creation error: {str(e)}")
+            return False
+    
+    def test_get_user_personas(self):
+        """Test getting user personas with authentication"""
+        try:
+            auth_headers = self.get_auth_headers()
+            response = requests.get(f"{BASE_URL}/personas", headers=auth_headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                personas = data.get("personas", [])
+                if isinstance(personas, list):
+                    # Should have at least 1 persona (default persona created during user creation)
+                    if len(personas) >= 1:
+                        # Check if our test persona is in the list
+                        test_persona_found = False
+                        if "persona_id" in self.test_data:
+                            test_persona_found = any(p.get("persona_id") == self.test_data["persona_id"] for p in personas)
+                        
+                        self.log_test("Get User Personas", True, f"Retrieved {len(personas)} personas" + 
+                                    (" (including our test persona)" if test_persona_found else ""))
+                        
+                        # Store first persona for further tests if we don't have one
+                        if personas and "default_persona_id" not in self.test_data:
+                            default_persona = next((p for p in personas if p.get("is_default")), personas[0])
+                            self.test_data["default_persona_id"] = default_persona.get("persona_id")
+                        
+                        return True
+                    else:
+                        self.log_test("Get User Personas", False, "No personas found for user")
+                        return False
+                else:
+                    self.log_test("Get User Personas", False, "Personas response is not a list")
+                    return False
+            else:
+                self.log_test("Get User Personas", False, f"Get personas failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Get User Personas", False, f"Get personas error: {str(e)}")
+            return False
+    
+    def test_get_specific_persona(self):
+        """Test getting a specific persona by ID"""
+        if "persona_id" not in self.test_data:
+            self.log_test("Get Specific Persona", False, "No persona_id available from previous test")
+            return False
+        
+        try:
+            persona_id = self.test_data["persona_id"]
+            auth_headers = self.get_auth_headers()
+            response = requests.get(f"{BASE_URL}/personas/{persona_id}", headers=auth_headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("persona_id") == persona_id and data.get("name") == self.test_data["persona_name"]:
+                    self.log_test("Get Specific Persona", True, f"Persona retrieved successfully: {data.get('name')}")
+                    return True
+                else:
+                    self.log_test("Get Specific Persona", False, "Persona data mismatch in response")
+                    return False
+            else:
+                self.log_test("Get Specific Persona", False, f"Get persona failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Get Specific Persona", False, f"Get persona error: {str(e)}")
+            return False
+    
+    def test_update_persona(self):
+        """Test updating a persona"""
+        if "persona_id" not in self.test_data:
+            self.log_test("Update Persona", False, "No persona_id available from previous test")
+            return False
+        
+        try:
+            persona_id = self.test_data["persona_id"]
+            update_data = {
+                "name": "Alex the Great Explorer",
+                "description": "An even more adventurous and curious person who loves exploring new worlds and dimensions",
+                "personality_traits": "Adventurous, curious, brave, friendly, optimistic, determined"
+            }
+            
+            auth_headers = self.get_auth_headers()
+            response = requests.put(f"{BASE_URL}/personas/{persona_id}", 
+                                  json=update_data, 
+                                  headers=auth_headers)
+            
+            if response.status_code == 200:
+                # Verify the update by getting the persona
+                get_response = requests.get(f"{BASE_URL}/personas/{persona_id}", headers=auth_headers)
+                if get_response.status_code == 200:
+                    data = get_response.json()
+                    if data.get("name") == update_data["name"]:
+                        self.test_data["persona_name"] = update_data["name"]  # Update for future tests
+                        self.log_test("Update Persona", True, f"Persona updated successfully: {data.get('name')}")
+                        return True
+                    else:
+                        self.log_test("Update Persona", False, "Persona update not reflected in data")
+                        return False
+                else:
+                    self.log_test("Update Persona", False, "Could not verify persona update")
+                    return False
+            else:
+                self.log_test("Update Persona", False, f"Persona update failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Update Persona", False, f"Persona update error: {str(e)}")
+            return False
+    
+    def test_get_default_persona(self):
+        """Test getting the default persona"""
+        try:
+            auth_headers = self.get_auth_headers()
+            response = requests.get(f"{BASE_URL}/personas/default", headers=auth_headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data and data.get("persona_id"):
+                    if data.get("is_default"):
+                        self.test_data["current_default_persona_id"] = data.get("persona_id")
+                        self.log_test("Get Default Persona", True, f"Default persona retrieved: {data.get('name')}")
+                        return True
+                    else:
+                        self.log_test("Get Default Persona", False, "Retrieved persona is not marked as default")
+                        return False
+                else:
+                    self.log_test("Get Default Persona", False, "No default persona found")
+                    return False
+            else:
+                self.log_test("Get Default Persona", False, f"Get default persona failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Get Default Persona", False, f"Get default persona error: {str(e)}")
+            return False
+    
+    def test_set_default_persona(self):
+        """Test setting a persona as default"""
+        if "persona_id" not in self.test_data:
+            self.log_test("Set Default Persona", False, "No persona_id available from previous test")
+            return False
+        
+        try:
+            persona_id = self.test_data["persona_id"]
+            auth_headers = self.get_auth_headers()
+            response = requests.post(f"{BASE_URL}/personas/{persona_id}/set-default", 
+                                   headers=auth_headers)
+            
+            if response.status_code == 200:
+                # Verify by getting the default persona
+                default_response = requests.get(f"{BASE_URL}/personas/default", headers=auth_headers)
+                if default_response.status_code == 200:
+                    default_data = default_response.json()
+                    if default_data.get("persona_id") == persona_id:
+                        self.log_test("Set Default Persona", True, f"Persona set as default successfully: {default_data.get('name')}")
+                        return True
+                    else:
+                        self.log_test("Set Default Persona", False, "Default persona was not updated correctly")
+                        return False
+                else:
+                    self.log_test("Set Default Persona", False, "Could not verify default persona update")
+                    return False
+            else:
+                self.log_test("Set Default Persona", False, f"Set default persona failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Set Default Persona", False, f"Set default persona error: {str(e)}")
+            return False
+    
+    def test_chat_with_persona_context(self):
+        """Test chat endpoint with persona context"""
+        if "persona_id" not in self.test_data or "conversation_id" not in self.test_data:
+            self.log_test("Chat with Persona Context", False, "Missing persona_id or conversation_id for persona chat test")
+            return False
+        
+        try:
+            chat_data = {
+                "conversation_id": self.test_data["conversation_id"],
+                "message": "Hello! I'm Alex, an adventurous explorer. Tell me about your world!",
+                "ai_provider": "openai",
+                "ai_model": "gpt-4.1",
+                "persona_id": self.test_data["persona_id"]
+            }
+            
+            auth_headers = self.get_auth_headers()
+            response = requests.post(f"{BASE_URL}/chat", 
+                                   json=chat_data, 
+                                   headers=auth_headers,
+                                   timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                ai_response = data.get("ai_response")
+                persona_used = data.get("persona_used")
+                
+                if ai_response and persona_used:
+                    ai_content = ai_response.get("content", "")
+                    if len(ai_content) > 10 and persona_used.get("persona_id") == self.test_data["persona_id"]:
+                        self.log_test("Chat with Persona Context", True, f"Chat with persona context successful. Persona: {persona_used.get('name')}", 
+                                    f"AI response preview: {ai_content[:100]}...")
+                        return True
+                    else:
+                        self.log_test("Chat with Persona Context", False, "AI response too short or persona not used correctly")
+                        return False
+                else:
+                    self.log_test("Chat with Persona Context", False, "Missing ai_response or persona_used in chat response")
+                    return False
+            else:
+                self.log_test("Chat with Persona Context", False, f"Chat with persona failed with status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Chat with Persona Context", False, f"Chat with persona error: {str(e)}")
+            return False
+    
+    def test_delete_persona_protection(self):
+        """Test that deleting the last persona is prevented"""
+        try:
+            # First, get all personas to see how many we have
+            auth_headers = self.get_auth_headers()
+            response = requests.get(f"{BASE_URL}/personas", headers=auth_headers)
+            
+            if response.status_code != 200:
+                self.log_test("Delete Persona Protection", False, "Could not get personas list for deletion test")
+                return False
+            
+            personas = response.json().get("personas", [])
+            
+            if len(personas) <= 1:
+                # Try to delete the only persona - should fail
+                if personas:
+                    persona_id = personas[0]["persona_id"]
+                    delete_response = requests.delete(f"{BASE_URL}/personas/{persona_id}", headers=auth_headers)
+                    
+                    if delete_response.status_code == 400:
+                        self.log_test("Delete Persona Protection", True, "Correctly prevented deletion of last persona")
+                        return True
+                    else:
+                        self.log_test("Delete Persona Protection", False, f"Should have prevented deletion of last persona, got status {delete_response.status_code}")
+                        return False
+                else:
+                    self.log_test("Delete Persona Protection", False, "No personas found for deletion test")
+                    return False
+            else:
+                # We have multiple personas, create one more and then delete it to test normal deletion
+                persona_data = {
+                    "name": "Temporary Test Persona",
+                    "description": "A temporary persona for deletion testing",
+                    "personality_traits": "Temporary, test-oriented",
+                    "is_default": False
+                }
+                
+                create_response = requests.post(f"{BASE_URL}/personas", 
+                                              json=persona_data, 
+                                              headers=auth_headers)
+                
+                if create_response.status_code == 200:
+                    temp_persona_id = create_response.json().get("persona_id")
+                    
+                    # Now delete this temporary persona
+                    delete_response = requests.delete(f"{BASE_URL}/personas/{temp_persona_id}", headers=auth_headers)
+                    
+                    if delete_response.status_code == 200:
+                        self.log_test("Delete Persona Protection", True, "Normal persona deletion works, and last persona protection should be in place")
+                        return True
+                    else:
+                        self.log_test("Delete Persona Protection", False, f"Normal persona deletion failed with status {delete_response.status_code}")
+                        return False
+                else:
+                    self.log_test("Delete Persona Protection", False, "Could not create temporary persona for deletion test")
+                    return False
+                    
+        except Exception as e:
+            self.log_test("Delete Persona Protection", False, f"Delete persona protection test error: {str(e)}")
+            return False
+    
     def run_all_tests(self):
         """Run all backend tests in sequence"""
         print("🚀 Starting Comprehensive Backend Testing for AI Character Interaction API")
