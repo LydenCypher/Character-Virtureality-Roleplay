@@ -1,105 +1,112 @@
 {
   "summary": {
-    "passed": 6,
-    "failed": 7,
-    "total": 13
+    "passed": 9,
+    "failed": 5,
+    "total": 14
   },
   "test_results": [
     {
       "test": "Health Check",
       "success": true,
       "message": "API is healthy: Character VR RP API is running",
-      "timestamp": "2025-07-26T12:17:29.332799",
+      "timestamp": "2025-07-26T12:20:17.057939",
       "details": null
     },
     {
       "test": "Create User",
       "success": true,
-      "message": "User created successfully with ID: 3fe39f7e-e6b5-4b22-a4c1-fd5dd2e5257e",
-      "timestamp": "2025-07-26T12:17:29.889419",
+      "message": "User created successfully with ID: f0919c6d-7193-4ff5-bb83-fa9e08a9a782",
+      "timestamp": "2025-07-26T12:20:17.609624",
       "details": null
     },
     {
       "test": "Get User",
       "success": true,
       "message": "User retrieved successfully: alice_wonderland",
-      "timestamp": "2025-07-26T12:17:30.444458",
+      "timestamp": "2025-07-26T12:20:18.164130",
       "details": null
     },
     {
-      "test": "Create Character",
+      "test": "Auth Callback (Invalid Session)",
       "success": false,
-      "message": "Character creation failed with status 401: {\"detail\":\"Not authenticated\"}",
-      "timestamp": "2025-07-26T12:17:30.994569",
+      "message": "Auth callback unexpected status 500: {\"detail\":\"Authentication error: \"}",
+      "timestamp": "2025-07-26T12:20:18.813344",
+      "details": null
+    },
+    {
+      "test": "Create Character (No Auth)",
+      "success": true,
+      "message": "Character creation correctly requires authentication",
+      "timestamp": "2025-07-26T12:20:19.365437",
       "details": null
     },
     {
       "test": "Get Characters",
       "success": true,
       "message": "Retrieved 0 characters",
-      "timestamp": "2025-07-26T12:17:31.554538",
+      "timestamp": "2025-07-26T12:20:19.919647",
       "details": null
     },
     {
       "test": "Get Character by ID",
       "success": false,
       "message": "No character_id available from previous test",
-      "timestamp": "2025-07-26T12:17:32.056049",
+      "timestamp": "2025-07-26T12:20:20.421070",
       "details": null
     },
     {
-      "test": "Create Conversation",
-      "success": false,
-      "message": "Missing user_id or character_id for conversation creation",
-      "timestamp": "2025-07-26T12:17:32.556191",
+      "test": "Create Conversation (No Auth)",
+      "success": true,
+      "message": "Conversation creation correctly requires authentication",
+      "timestamp": "2025-07-26T12:20:20.968190",
       "details": null
     },
     {
       "test": "Get User Conversations",
       "success": true,
       "message": "Retrieved 0 conversations",
-      "timestamp": "2025-07-26T12:17:33.104893",
+      "timestamp": "2025-07-26T12:20:21.524265",
       "details": null
     },
     {
       "test": "AI Providers",
       "success": true,
       "message": "Retrieved 3 AI providers, OpenAI is available",
-      "timestamp": "2025-07-26T12:17:33.658220",
+      "timestamp": "2025-07-26T12:20:22.099208",
       "details": null
     },
     {
-      "test": "AI Chat",
-      "success": false,
-      "message": "No conversation_id available for chat testing",
-      "timestamp": "2025-07-26T12:17:34.159692",
+      "test": "AI Chat (No Auth)",
+      "success": true,
+      "message": "AI chat correctly requires authentication",
+      "timestamp": "2025-07-26T12:20:22.652711",
       "details": null
     },
     {
       "test": "Get Conversation Messages",
       "success": false,
       "message": "No conversation_id available for getting messages",
-      "timestamp": "2025-07-26T12:17:34.659824",
+      "timestamp": "2025-07-26T12:20:23.154119",
       "details": null
     },
     {
       "test": "Multi-turn Conversation",
       "success": false,
       "message": "No conversation_id available for multi-turn test",
-      "timestamp": "2025-07-26T12:17:35.159956",
+      "timestamp": "2025-07-26T12:20:23.654262",
       "details": null
     },
     {
       "test": "Different Chat Modes",
       "success": false,
       "message": "Missing user_id or character_id for mode testing",
-      "timestamp": "2025-07-26T12:17:35.660092",
+      "timestamp": "2025-07-26T12:20:24.154393",
       "details": null
     }
   ],
   "test_data": {
-    "user_id": "3fe39f7e-e6b5-4b22-a4c1-fd5dd2e5257e",
+    "user_id": "f0919c6d-7193-4ff5-bb83-fa9e08a9a782",
     "username": "alice_wonderland",
-    "email": "alice.wonderland.c889f79b@example.com"
+    "email": "alice.wonderland.afec2a37@example.com"
   }
 }
