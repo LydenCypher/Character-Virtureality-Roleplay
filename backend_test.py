@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 
 # Configuration
-BASE_URL = "https://a5fc9cbd-a92d-4861-a0c2-8274413fdaca.preview.emergentagent.com/api"
+BASE_URL = "https://10e263c1-5d46-4536-8f0d-895107f6b925.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 class BackendTester:
