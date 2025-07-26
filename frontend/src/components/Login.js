@@ -97,7 +97,7 @@ const Login = () => {
           {/* Logo and Title */}
           <div className="text-center">
             <div className="mx-auto h-20 w-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center vr-glow mb-6">
-              <VrIcon className="h-10 w-10 text-white" />
+              <Glasses className="h-10 w-10 text-white" />
             </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2" style={{fontFamily: 'Orbitron, monospace'}}>
               Character VR RP
