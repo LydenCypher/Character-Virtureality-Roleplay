@@ -175,6 +175,34 @@ class CreateRoomRequest(BaseModel):
 class AuthCallbackRequest(BaseModel):
     session_id: str
 
+class Persona(BaseModel):
+    persona_id: str
+    user_id: str
+    name: str
+    description: str
+    personality_traits: str
+    avatar: Optional[str] = None
+    preferences: Dict[str, Any] = {}
+    is_default: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+class CreatePersonaRequest(BaseModel):
+    name: str
+    description: str
+    personality_traits: str
+    avatar: Optional[str] = None
+    preferences: Dict[str, Any] = {}
+    is_default: bool = False
+
+class UpdatePersonaRequest(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    personality_traits: Optional[str] = None
+    avatar: Optional[str] = None
+    preferences: Optional[Dict[str, Any]] = None
+    is_default: Optional[bool] = None
+
 # Helper functions
 def get_api_key(provider: str) -> str:
     """Get API key for the specified provider"""
