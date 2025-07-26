@@ -27,6 +27,7 @@ const Navbar = () => {
   const navItems = [
     { path: '/', label: 'Home', icon: MessageCircle },
     { path: '/characters', label: 'Characters', icon: Users },
+    { path: '/personas', label: 'Personas', icon: User },
     { path: '/multiplayer', label: 'Multiplayer', icon: Gamepad2 },
     { path: '/create-character', label: 'Create', icon: Plus },
     { path: '/settings', label: 'Settings', icon: Settings }
