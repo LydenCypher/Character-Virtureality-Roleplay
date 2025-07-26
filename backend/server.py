@@ -215,8 +215,8 @@ def get_api_key(provider: str) -> str:
         return os.environ.get('GEMINI_API_KEY')
     return None
 
-def create_character_system_prompt(character: dict, mode: str = "casual") -> str:
-    """Create a system prompt for the character based on mode"""
+def create_character_system_prompt(character: dict, mode: str = "casual", persona: Optional[dict] = None) -> str:
+    """Create a system prompt for the character based on mode and user persona"""
     base_prompt = f"""You are {character['name']}, a character in Character VR RP with the following traits:
 
 Description: {character['description']}
@@ -238,6 +238,17 @@ Custom Instructions: {character.get('system_prompt', '')}
     
     if character.get('is_multiplayer', False):
         base_prompt += "\n\nNote: This is a multiplayer environment. Multiple users may be present. Address users appropriately and be aware of group dynamics."
+    
+    # Add persona context if provided
+    if persona:
+        base_prompt += f"""
+
+USER PERSONA CONTEXT:
+You are chatting with {persona['name']}:
+- Description: {persona['description']}
+- Personality Traits: {persona['personality_traits']}
+
+Please keep this persona in mind when responding, but respond naturally as your character {character['name']}."""
     
     return base_prompt
 
