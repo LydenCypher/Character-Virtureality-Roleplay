@@ -762,6 +762,20 @@ async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_curre
         if not character:
             raise HTTPException(status_code=404, detail="Character not found")
         
+        # Get persona if specified
+        persona = None
+        if chat_request.persona_id:
+            persona = personas_collection.find_one({
+                "persona_id": chat_request.persona_id,
+                "user_id": current_user["user_id"]
+            }, {"_id": 0})
+        else:
+            # Use default persona if no specific persona provided
+            persona = personas_collection.find_one({
+                "user_id": current_user["user_id"],
+                "is_default": True
+            }, {"_id": 0})
+        
         # Use request AI settings
         ai_provider = chat_request.ai_provider or "openai"
         ai_model = chat_request.ai_model or "gpt-4.1"
@@ -784,12 +798,12 @@ async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_curre
         )
         messages_collection.insert_one(user_message.dict())
         
-        # Create system prompt based on character and mode
+        # Create system prompt based on character, mode, and persona
         mode = "casual"  # Default mode
         if not chat_request.room_id:
             mode = conversation.get("mode", "casual")
         
-        system_prompt = create_character_system_prompt(character, mode)
+        system_prompt = create_character_system_prompt(character, mode, persona)
         
         # Create AI chat instance
         chat_instance = LlmChat(
@@ -821,7 +835,8 @@ async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_curre
             "user_message": user_message.dict(),
             "ai_response": ai_message.dict(),
             "ai_provider": ai_provider,
-            "ai_model": ai_model
+            "ai_model": ai_model,
+            "persona_used": persona
         }
         
     except Exception as e:
