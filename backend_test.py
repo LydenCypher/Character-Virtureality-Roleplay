@@ -468,12 +468,17 @@ class BackendTester:
                 if not self.test_create_user():
                     return None
             
-            # Create a mock session for testing
+            # For testing purposes, we'll create a mock session ID
+            # Note: This won't work with the actual authentication system
+            # which requires valid sessions from Emergent Auth API
             session_id = f"test_session_{uuid.uuid4().hex[:8]}"
             self.test_data["session_id"] = session_id
             
-            # For testing purposes, we'll use the session_id as a header
-            # In real implementation, this would be validated against Emergent Auth
+            # In a real test environment, we would need to:
+            # 1. Create a valid session via the auth callback endpoint
+            # 2. Use a real session from Emergent Auth API
+            # For now, we'll test the endpoint structure and error handling
+            
             return session_id
         except Exception as e:
             print(f"Error creating test session: {str(e)}")
