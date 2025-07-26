@@ -18,13 +18,43 @@ export const AuthProvider = ({ children }) => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
   useEffect(() => {
-    // Check for existing user in localStorage
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
-  }, []);
+    const initializeAuth = async () => {
+      try {
+        // Check for existing session
+        const sessionId = localStorage.getItem('session_id');
+        const savedUser = localStorage.getItem('user');
+
+        if (sessionId && savedUser) {
+          // Verify session is still valid
+          try {
+            const response = await axios.get(`${backendUrl}/api/users/me`, {
+              headers: {
+                'X-Session-ID': sessionId
+              }
+            });
+            
+            if (response.data) {
+              setUser(JSON.parse(savedUser));
+            } else {
+              // Session invalid, clear storage
+              localStorage.removeItem('session_id');
+              localStorage.removeItem('user');
+            }
+          } catch (error) {
+            // Session invalid, clear storage
+            localStorage.removeItem('session_id');
+            localStorage.removeItem('user');
+          }
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, [backendUrl]);
 
   const login = async (username, email) => {
     try {
@@ -69,13 +99,15 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('session_id');
   };
 
   const value = {
     user,
     login,
     logout,
-    loading
+    loading,
+    setUser // Export setUser for use in AuthCallback
   };
 
   return (
