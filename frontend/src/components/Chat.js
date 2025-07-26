@@ -102,7 +102,12 @@ const Chat = () => {
         conversation_id: conversationId,
         message: messageText,
         ai_provider: selectedProvider,
-        ai_model: selectedModel
+        ai_model: selectedModel,
+        persona_id: selectedPersona?.persona_id
+      }, {
+        headers: {
+          'X-Session-ID': localStorage.getItem('session_id') || ''
+        }
       });
 
       setMessages(prev => [...prev, response.data.user_message, response.data.ai_response]);
