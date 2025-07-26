@@ -14,7 +14,8 @@ import {
   X,
   Glasses,
   Gamepad2,
-  Zap
+  Zap,
+  User
 } from 'lucide-react';
 
 const Navbar = () => {
