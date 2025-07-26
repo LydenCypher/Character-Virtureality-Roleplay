@@ -340,7 +340,31 @@ const Chat = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         {message.sender === 'user' ? (
-                          <User className="w-4 h-4" />
+                          <div className="flex items-center space-x-2">
+                            {selectedPersona ? (
+                              <>
+                                {selectedPersona.avatar ? (
+                                  <img
+                                    src={selectedPersona.avatar}
+                                    alt={selectedPersona.name}
+                                    className="w-4 h-4 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-xs">
+                                      {selectedPersona.name.charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                )}
+                                <span className="text-sm font-medium">{selectedPersona.name}</span>
+                              </>
+                            ) : (
+                              <>
+                                <User className="w-4 h-4" />
+                                <span className="text-sm font-medium">You</span>
+                              </>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-sm font-medium">{character.name}</span>
                         )}
