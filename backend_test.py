@@ -7,7 +7,7 @@ Tests all endpoints systematically including AI integration
 import requests
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
 # Configuration
