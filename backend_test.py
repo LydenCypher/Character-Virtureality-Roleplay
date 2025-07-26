@@ -420,48 +420,151 @@ class BackendTester:
             self.log_test("Get Conversation Messages", False, f"Get messages error: {str(e)}")
             return False
     
-    def test_multi_turn_conversation(self):
-        """Test multi-turn conversation to verify session management"""
-        if "conversation_id" not in self.test_data:
-            self.log_test("Multi-turn Conversation", False, "No conversation_id available for multi-turn test")
-            return False
-        
+    def test_full_ai_chat_flow(self):
+        """Test complete AI chat flow with authentication simulation"""
         try:
-            # Send a follow-up message that references the previous conversation
-            chat_data = {
-                "conversation_id": self.test_data["conversation_id"],
-                "message": "That's fascinating! Can you tell me more about what you just mentioned?",
+            # First, create a user and simulate authentication
+            if "user_id" not in self.test_data:
+                if not self.test_create_user():
+                    self.log_test("Full AI Chat Flow", False, "Failed to create user for chat test")
+                    return False
+            
+            user_id = self.test_data["user_id"]
+            
+            # Create a test character directly in database for testing
+            import sys
+            sys.path.append('/app/backend')
+            
+            from pymongo import MongoClient
+            import os
+            from dotenv import load_dotenv
+            import uuid
+            from datetime import datetime
+            
+            load_dotenv('/app/backend/.env')
+            MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017/character_vr_rp')
+            client = MongoClient(MONGO_URL)
+            db = client.get_default_database()
+            
+            # Create a test character
+            character_id = str(uuid.uuid4())
+            test_character = {
+                "character_id": character_id,
+                "name": "Luna the Mystic",
+                "description": "A wise and mysterious sorceress from the enchanted forest",
+                "personality": "Wise, mysterious, compassionate, slightly mischievous",
+                "avatar": None,
                 "ai_provider": "openai",
-                "ai_model": "gpt-4.1"
+                "ai_model": "gpt-4o-mini",
+                "system_prompt": "You are Luna, a mystical sorceress. Speak with wisdom and mystery.",
+                "is_nsfw": False,
+                "is_multiplayer": False,
+                "created_by": user_id,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
             }
             
-            print("   Sending follow-up message to test conversation memory...")
+            db.characters.insert_one(test_character)
+            self.test_data["character_id"] = character_id
+            self.test_data["character_name"] = "Luna the Mystic"
+            
+            # Create a test conversation
+            conversation_id = str(uuid.uuid4())
+            test_conversation = {
+                "conversation_id": conversation_id,
+                "user_id": user_id,
+                "character_id": character_id,
+                "room_id": None,
+                "title": "Test AI Chat",
+                "mode": "casual",
+                "is_nsfw": False,
+                "ai_provider": "openai",
+                "ai_model": "gpt-4o-mini",
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            db.conversations.insert_one(test_conversation)
+            self.test_data["conversation_id"] = conversation_id
+            
+            # Create a test session
+            session_id = str(uuid.uuid4())
+            test_session = {
+                "session_id": session_id,
+                "user_id": user_id,
+                "session_token": "test_token",
+                "expires_at": datetime.utcnow() + timedelta(hours=1),
+                "created_at": datetime.utcnow()
+            }
+            
+            db.sessions.insert_one(test_session)
+            
+            # Now test the AI chat with authentication
+            chat_data = {
+                "conversation_id": conversation_id,
+                "message": "Hello Luna! Tell me about the mystical arts.",
+                "ai_provider": "openai",
+                "ai_model": "gpt-4o-mini"
+            }
+            
+            auth_headers = HEADERS.copy()
+            auth_headers["X-Session-ID"] = session_id
+            
+            print("   Testing AI chat with authentication...")
             response = requests.post(f"{BASE_URL}/chat", 
                                    json=chat_data, 
-                                   headers=HEADERS,
+                                   headers=auth_headers,
                                    timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
                 ai_response = data.get("ai_response")
+                user_message = data.get("user_message")
                 
-                if ai_response:
+                if ai_response and user_message:
                     ai_content = ai_response.get("content", "")
                     if len(ai_content) > 10:
-                        self.log_test("Multi-turn Conversation", True, f"Multi-turn conversation successful. AI maintained context.", 
-                                    f"Follow-up response preview: {ai_content[:100]}...")
+                        self.log_test("Full AI Chat Flow", True, f"Complete AI chat flow successful", 
+                                    f"AI Response preview: {ai_content[:100]}...")
+                        
+                        # Test multi-turn conversation
+                        follow_up_data = {
+                            "conversation_id": conversation_id,
+                            "message": "That's fascinating! Can you tell me more?",
+                            "ai_provider": "openai",
+                            "ai_model": "gpt-4o-mini"
+                        }
+                        
+                        print("   Testing multi-turn conversation...")
+                        follow_up_response = requests.post(f"{BASE_URL}/chat", 
+                                                         json=follow_up_data, 
+                                                         headers=auth_headers,
+                                                         timeout=30)
+                        
+                        if follow_up_response.status_code == 200:
+                            follow_up_data = follow_up_response.json()
+                            follow_up_ai = follow_up_data.get("ai_response")
+                            if follow_up_ai and len(follow_up_ai.get("content", "")) > 10:
+                                self.log_test("Multi-turn Conversation", True, "Multi-turn conversation successful with context memory")
+                                return True
+                            else:
+                                self.log_test("Multi-turn Conversation", False, "Follow-up response too short")
+                        else:
+                            self.log_test("Multi-turn Conversation", False, f"Follow-up failed: {follow_up_response.status_code}")
+                        
                         return True
                     else:
-                        self.log_test("Multi-turn Conversation", False, "AI follow-up response too short or empty")
+                        self.log_test("Full AI Chat Flow", False, "AI response too short")
                         return False
                 else:
-                    self.log_test("Multi-turn Conversation", False, "Missing ai_response in follow-up chat")
+                    self.log_test("Full AI Chat Flow", False, "Missing ai_response or user_message in response")
                     return False
             else:
-                self.log_test("Multi-turn Conversation", False, f"Multi-turn chat failed with status {response.status_code}: {response.text}")
+                self.log_test("Full AI Chat Flow", False, f"AI chat failed with status {response.status_code}: {response.text}")
                 return False
+                
         except Exception as e:
-            self.log_test("Multi-turn Conversation", False, f"Multi-turn conversation error: {str(e)}")
+            self.log_test("Full AI Chat Flow", False, f"Full AI chat flow error: {str(e)}")
             return False
     
     def test_different_chat_modes(self):
