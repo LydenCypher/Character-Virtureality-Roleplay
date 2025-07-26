@@ -1055,6 +1055,7 @@ class BackendTester:
             ("Auth Callback (Invalid Session)", self.test_auth_callback),
             ("AI Integration Direct", self.test_ai_integration_direct),  # New focused AI test
             ("Full AI Chat Flow", self.test_full_ai_chat_flow),  # Complete AI chat test
+            ("Persona AI Chat Integration", self.test_persona_ai_chat_integration),  # Persona + AI test
             ("Create Character (No Auth)", self.test_create_character),
             ("Get Characters", self.test_get_characters),
             ("Get Character by ID", self.test_get_character_by_id),
@@ -1072,7 +1073,6 @@ class BackendTester:
             ("Update Persona", self.test_update_persona),
             ("Get Default Persona", self.test_get_default_persona),
             ("Set Default Persona", self.test_set_default_persona),
-            ("Chat with Persona Context", self.test_chat_with_persona_context),
             ("Delete Persona Protection", self.test_delete_persona_protection),
         ]
         
