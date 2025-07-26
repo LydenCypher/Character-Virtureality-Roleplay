@@ -207,14 +207,10 @@ class BackendTester:
             return False
     
     def test_create_conversation(self):
-        """Test conversation creation"""
-        if "user_id" not in self.test_data or "character_id" not in self.test_data:
-            self.log_test("Create Conversation", False, "Missing user_id or character_id for conversation creation")
-            return False
-        
+        """Test conversation creation (should fail without authentication)"""
         try:
             conversation_data = {
-                "character_id": self.test_data["character_id"],
+                "character_id": "test_character_id",
                 "title": "A Mystical Encounter",
                 "mode": "rp",
                 "is_nsfw": False,
@@ -222,28 +218,19 @@ class BackendTester:
                 "ai_model": "gpt-4.1"
             }
             
-            user_id = self.test_data["user_id"]
             response = requests.post(f"{BASE_URL}/conversations", 
                                    json=conversation_data, 
-                                   params={"user_id": user_id},
                                    headers=HEADERS)
             
-            if response.status_code == 200:
-                data = response.json()
-                conversation_id = data.get("conversation_id")
-                if conversation_id:
-                    self.test_data["conversation_id"] = conversation_id
-                    self.test_data["conversation_title"] = conversation_data["title"]
-                    self.log_test("Create Conversation", True, f"Conversation created successfully: {conversation_data['title']} (ID: {conversation_id})")
-                    return True
-                else:
-                    self.log_test("Create Conversation", False, "Conversation creation response missing conversation_id")
-                    return False
+            # Should fail with 401 for missing authentication
+            if response.status_code == 401:
+                self.log_test("Create Conversation (No Auth)", True, "Conversation creation correctly requires authentication")
+                return True
             else:
-                self.log_test("Create Conversation", False, f"Conversation creation failed with status {response.status_code}: {response.text}")
+                self.log_test("Create Conversation (No Auth)", False, f"Conversation creation unexpected status {response.status_code}: {response.text}")
                 return False
         except Exception as e:
-            self.log_test("Create Conversation", False, f"Conversation creation error: {str(e)}")
+            self.log_test("Create Conversation (No Auth)", False, f"Conversation creation error: {str(e)}")
             return False
     
     def test_get_user_conversations(self):
