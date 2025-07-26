@@ -40,6 +40,7 @@ conversations_collection = db.conversations
 messages_collection = db.messages
 sessions_collection = db.sessions
 multiplayer_rooms_collection = db.multiplayer_rooms
+personas_collection = db.personas
 
 # Security
 security = HTTPBearer()
