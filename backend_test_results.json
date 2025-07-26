@@ -9,185 +9,185 @@
       "test": "Health Check",
       "success": true,
       "message": "API is healthy: Character VR RP API is running",
-      "timestamp": "2025-07-26T18:52:26.286763",
+      "timestamp": "2025-07-26T18:53:36.565817",
       "details": null
     },
     {
       "test": "Create User",
       "success": true,
-      "message": "User created successfully with ID: 94c1f7f2-8529-460f-9283-955c9cf0e5d8",
-      "timestamp": "2025-07-26T18:52:26.842878",
+      "message": "User created successfully with ID: 269742ae-92e6-4fba-ac31-d56c09f2fdc7",
+      "timestamp": "2025-07-26T18:53:37.121142",
       "details": null
     },
     {
       "test": "Get User",
       "success": true,
       "message": "User retrieved successfully: alice_wonderland",
-      "timestamp": "2025-07-26T18:52:27.392648",
+      "timestamp": "2025-07-26T18:53:37.675407",
       "details": null
     },
     {
       "test": "Auth Callback (Invalid Session)",
       "success": false,
       "message": "Auth callback unexpected status 500: {\"detail\":\"Authentication error: \"}",
-      "timestamp": "2025-07-26T18:52:28.053298",
+      "timestamp": "2025-07-26T18:53:38.330011",
       "details": null
     },
     {
       "test": "AI Integration Direct",
       "success": true,
       "message": "OpenAI API connection successful",
-      "timestamp": "2025-07-26T18:52:32.073904",
+      "timestamp": "2025-07-26T18:53:42.342259",
       "details": "AI Response: Connection successful!..."
     },
     {
       "test": "Full AI Chat Flow",
       "success": true,
       "message": "Complete AI chat flow successful",
-      "timestamp": "2025-07-26T18:52:36.008540",
-      "details": "AI Response preview: Ah, greetings, dear seeker of knowledge! The mystical arts, like the intertwining roots of the ancie..."
+      "timestamp": "2025-07-26T18:53:45.623967",
+      "details": "AI Response preview: Ah, greetings, dear Alice! The mystical arts are a tapestry woven from the threads of nature, intuit..."
     },
     {
       "test": "Multi-turn Conversation",
       "success": true,
       "message": "Multi-turn conversation successful with context memory",
-      "timestamp": "2025-07-26T18:52:37.893599",
+      "timestamp": "2025-07-26T18:53:47.301862",
       "details": null
+    },
+    {
+      "test": "Persona AI Chat Integration",
+      "success": true,
+      "message": "AI chat with persona context successful. Persona: Alex the Explorer",
+      "timestamp": "2025-07-26T18:54:11.064080",
+      "details": "AI Response preview: Ah, welcome, brave Alex! The winds of destiny have whispered your name through the rustling leaves o..."
     },
     {
       "test": "Create Character (No Auth)",
       "success": true,
       "message": "Character creation correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:38.475253",
+      "timestamp": "2025-07-26T18:54:11.654513",
       "details": null
     },
     {
       "test": "Get Characters",
       "success": true,
-      "message": "Retrieved 1 characters (including our test character)",
-      "timestamp": "2025-07-26T18:52:39.038377",
+      "message": "Retrieved 2 characters (including our test character)",
+      "timestamp": "2025-07-26T18:54:12.210313",
       "details": null
     },
     {
       "test": "Get Character by ID",
       "success": true,
       "message": "Character retrieved successfully: Luna the Mystic",
-      "timestamp": "2025-07-26T18:52:39.595571",
+      "timestamp": "2025-07-26T18:54:12.769187",
       "details": null
     },
     {
       "test": "Create Conversation (No Auth)",
       "success": true,
       "message": "Conversation creation correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:40.146291",
+      "timestamp": "2025-07-26T18:54:13.323368",
       "details": null
     },
     {
       "test": "Get User Conversations",
       "success": true,
-      "message": "Retrieved 1 conversations (including our test conversation)",
-      "timestamp": "2025-07-26T18:52:40.698985",
+      "message": "Retrieved 2 conversations (including our test conversation)",
+      "timestamp": "2025-07-26T18:54:13.874857",
       "details": null
     },
     {
       "test": "AI Providers",
       "success": true,
       "message": "Retrieved 3 AI providers, OpenAI is available",
-      "timestamp": "2025-07-26T18:52:41.250020",
+      "timestamp": "2025-07-26T18:54:14.429811",
       "details": null
     },
     {
       "test": "AI Chat (No Auth)",
       "success": true,
       "message": "AI chat correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:41.802661",
+      "timestamp": "2025-07-26T18:54:14.984146",
       "details": null
     },
     {
       "test": "Get Conversation Messages",
       "success": true,
       "message": "Retrieved 4 messages from conversation",
-      "timestamp": "2025-07-26T18:52:42.353208",
+      "timestamp": "2025-07-26T18:54:15.542096",
       "details": null
     },
     {
       "test": "Different Chat Modes",
       "success": false,
       "message": "No additional chat modes working",
-      "timestamp": "2025-07-26T18:52:42.955426",
+      "timestamp": "2025-07-26T18:54:16.156515",
       "details": null
     },
     {
       "test": "Get User Personas (No Auth)",
       "success": true,
       "message": "Personas endpoint correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:43.538083",
+      "timestamp": "2025-07-26T18:54:16.732183",
       "details": null
     },
     {
       "test": "Create Persona",
       "success": true,
       "message": "Persona creation endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:44.092307",
+      "timestamp": "2025-07-26T18:54:17.290223",
       "details": null
     },
     {
       "test": "Get User Personas",
       "success": true,
       "message": "Get personas endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:44.642237",
+      "timestamp": "2025-07-26T18:54:17.849166",
       "details": null
     },
     {
       "test": "Get Specific Persona",
       "success": true,
       "message": "Get specific persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:45.192904",
+      "timestamp": "2025-07-26T18:54:18.401856",
       "details": null
     },
     {
       "test": "Update Persona",
       "success": true,
       "message": "Update persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:45.744114",
+      "timestamp": "2025-07-26T18:54:18.954250",
       "details": null
     },
     {
       "test": "Get Default Persona",
       "success": true,
       "message": "Get default persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:46.294507",
+      "timestamp": "2025-07-26T18:54:19.506690",
       "details": null
     },
     {
       "test": "Set Default Persona",
       "success": true,
       "message": "Set default persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:46.846167",
-      "details": null
-    },
-    {
-      "test": "Chat with Persona Context",
-      "success": true,
-      "message": "Chat endpoint exists and correctly requires authentication. Persona context parameter accepted.",
-      "timestamp": "2025-07-26T18:52:47.398328",
+      "timestamp": "2025-07-26T18:54:20.058721",
       "details": null
     },
     {
       "test": "Delete Persona Protection",
       "success": true,
       "message": "Delete persona endpoint exists and correctly requires authentication",
-      "timestamp": "2025-07-26T18:52:47.952562",
+      "timestamp": "2025-07-26T18:54:20.609739",
       "details": null
     }
   ],
   "test_data": {
-    "user_id": "94c1f7f2-8529-460f-9283-955c9cf0e5d8",
+    "user_id": "269742ae-92e6-4fba-ac31-d56c09f2fdc7",
     "username": "alice_wonderland",
-    "email": "alice.wonderland.bb215628@example.com",
-    "character_id": "5231d7cf-5ebb-4dbe-863e-1c6a0cca1102",
+    "email": "alice.wonderland.c0331da5@example.com",
+    "character_id": "c280f20a-b64b-4de2-8ea1-2aa966336a5e",
     "character_name": "Luna the Mystic",
-    "conversation_id": "c806f8f7-66fe-4074-b215-fd7ecea9791d",
-    "session_id": "test_session_b7ce95f8"
+    "conversation_id": "76fd3f6a-6993-4dde-b025-9bfb553da722",
+    "session_id": "test_session_b7b36fb4"
   }
 }
