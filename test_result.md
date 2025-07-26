@@ -198,6 +198,11 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  completed_focus:
+    - "Persona Management (CRUD Operations)"
+    - "Persona Default Logic"
+    - "Persona Integration with Chat"
+    - "Persona Security and Ownership"
 
 agent_communication:
   - agent: "testing"
