@@ -10,6 +10,7 @@ import CharacterCreator from './components/CharacterCreator';
 import Chat from './components/Chat';
 import Settings from './components/Settings';
 import Login from './components/Login';
+import AuthCallback from './components/AuthCallback';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
