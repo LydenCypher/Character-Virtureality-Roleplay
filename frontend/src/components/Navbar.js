@@ -47,7 +47,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center vr-glow">
-              <VrIcon className="w-6 h-6 text-white" />
+              <Glasses className="w-6 h-6 text-white" />
             </div>
             <div className="hidden sm:block">
               <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent" style={{fontFamily: 'Orbitron, monospace'}}>
