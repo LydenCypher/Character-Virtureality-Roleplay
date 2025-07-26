@@ -225,13 +225,13 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "AI Chat Integration with emergentintegrations"
-    - "Multi-turn Conversation Support"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   completed_focus:
+    - "AI Chat Integration with emergentintegrations"
+    - "Multi-turn Conversation Support"
     - "Persona Management (CRUD Operations)"
     - "Persona Default Logic"
     - "Persona Integration with Chat"
