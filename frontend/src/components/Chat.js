@@ -14,6 +14,7 @@ import {
   Bot
 } from 'lucide-react';
 import axios from 'axios';
+import PersonaSelector from './PersonaSelector';
 
 const Chat = () => {
   const { conversationId } = useParams();
