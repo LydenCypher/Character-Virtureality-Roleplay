@@ -13,3 +13,4 @@ uuid==1.30
 websockets==14.2
 aiofiles==23.2.1
 emergentintegrations
+httpx
