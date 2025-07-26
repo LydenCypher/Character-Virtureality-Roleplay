@@ -11,6 +11,8 @@ import Chat from './components/Chat';
 import Settings from './components/Settings';
 import Login from './components/Login';
 import AuthCallback from './components/AuthCallback';
+import PersonaList from './components/PersonaList';
+import PersonaCreator from './components/PersonaCreator';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
