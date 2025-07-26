@@ -831,6 +831,16 @@ class BackendTester:
             ("Get Conversation Messages", self.test_get_conversation_messages),
             ("Multi-turn Conversation", self.test_multi_turn_conversation),
             ("Different Chat Modes", self.test_different_chat_modes),
+            # Persona Management Tests
+            ("Get User Personas (No Auth)", self.test_get_user_personas_no_auth),
+            ("Create Persona", self.test_create_persona),
+            ("Get User Personas", self.test_get_user_personas),
+            ("Get Specific Persona", self.test_get_specific_persona),
+            ("Update Persona", self.test_update_persona),
+            ("Get Default Persona", self.test_get_default_persona),
+            ("Set Default Persona", self.test_set_default_persona),
+            ("Chat with Persona Context", self.test_chat_with_persona_context),
+            ("Delete Persona Protection", self.test_delete_persona_protection),
         ]
         
         passed = 0
