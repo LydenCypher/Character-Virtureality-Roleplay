@@ -984,6 +984,7 @@ class BackendTester:
             ("Get User", self.test_get_user),
             ("Auth Callback (Invalid Session)", self.test_auth_callback),
             ("AI Integration Direct", self.test_ai_integration_direct),  # New focused AI test
+            ("Full AI Chat Flow", self.test_full_ai_chat_flow),  # Complete AI chat test
             ("Create Character (No Auth)", self.test_create_character),
             ("Get Characters", self.test_get_characters),
             ("Get Character by ID", self.test_get_character_by_id),
@@ -992,7 +993,6 @@ class BackendTester:
             ("AI Providers", self.test_ai_providers),
             ("AI Chat (No Auth)", self.test_ai_chat),
             ("Get Conversation Messages", self.test_get_conversation_messages),
-            ("Multi-turn Conversation", self.test_multi_turn_conversation),
             ("Different Chat Modes", self.test_different_chat_modes),
             # Persona Management Tests
             ("Get User Personas (No Auth)", self.test_get_user_personas_no_auth),
