@@ -72,21 +72,37 @@ yarn install
 
 4. **Environment Variables**
 
-Create `.env` files in both backend and frontend directories:
+Create `.env` files in both backend and frontend directories by copying the template files:
+
+**Backend Setup:**
+```bash
+cd backend
+cp .env.template .env
+# Edit .env and add your actual API keys
+```
 
 **Backend (.env):**
 ```env
 MONGO_URL=mongodb://localhost:27017/ai_character_app
-OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-JWT_SECRET_KEY=your_jwt_secret_key_here
+OPENAI_API_KEY=your_actual_openai_api_key
+ANTHROPIC_API_KEY=your_actual_anthropic_api_key
+GEMINI_API_KEY=your_actual_gemini_api_key
+JWT_SECRET_KEY=your_actual_jwt_secret_key
+```
+
+**Frontend Setup:**
+```bash
+cd frontend
+cp .env.template .env
+# Edit .env and set your backend URL
 ```
 
 **Frontend (.env):**
 ```env
 REACT_APP_BACKEND_URL=http://localhost:8001
 ```
+
+⚠️ **IMPORTANT**: Never commit `.env` files to version control. They contain sensitive API keys.
 
 ## Running the Application
 
