@@ -30,6 +30,7 @@ const Chat = () => {
   const [selectedMode, setSelectedMode] = useState('casual');
   const [selectedProvider, setSelectedProvider] = useState('openai');
   const [selectedModel, setSelectedModel] = useState('gpt-4.1');
+  const [selectedPersona, setSelectedPersona] = useState(null);
   const messagesEndRef = useRef(null);
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
