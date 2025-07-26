@@ -45,6 +45,7 @@ function AppContent() {
       <main className={user ? "pt-16" : ""}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/" element={
             <ProtectedRoute>
               <Home />
