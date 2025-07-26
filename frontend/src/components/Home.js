@@ -9,7 +9,7 @@ import {
   Brain, 
   Globe, 
   Heart,
-  VrIcon,
+  Glasses,
   Gamepad2,
   Sparkles,
   Crown,
