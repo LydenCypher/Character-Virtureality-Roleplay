@@ -213,6 +213,13 @@ const Chat = () => {
           </div>
 
           <div className="flex items-center space-x-2">
+            {/* Persona Selector */}
+            <PersonaSelector
+              selectedPersona={selectedPersona}
+              onPersonaChange={setSelectedPersona}
+              className="mr-4"
+            />
+            
             {/* Chat Mode Selector */}
             <div className="chat-mode-selector">
               {chatModes.map(mode => (
