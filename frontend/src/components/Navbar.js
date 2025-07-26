@@ -11,7 +11,10 @@ import {
   Sun,
   LogOut,
   Menu,
-  X
+  X,
+  VrIcon,
+  Gamepad2,
+  Zap
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -23,6 +26,7 @@ const Navbar = () => {
   const navItems = [
     { path: '/', label: 'Home', icon: MessageCircle },
     { path: '/characters', label: 'Characters', icon: Users },
+    { path: '/multiplayer', label: 'Multiplayer', icon: Gamepad2 },
     { path: '/create-character', label: 'Create', icon: Plus },
     { path: '/settings', label: 'Settings', icon: Settings }
   ];
@@ -37,15 +41,19 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-dark-800 border-b border-gray-200 dark:border-dark-700 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/95 backdrop-blur-sm border-b border-purple-500/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center vr-glow">
+              <VrIcon className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold gradient-text">AI Characters</span>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent" style={{fontFamily: 'Orbitron, monospace'}}>
+                Character VR RP
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -57,10 +65,10 @@ const Navbar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                      ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -74,18 +82,25 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+              className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800/50 transition-all duration-200"
             >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
             
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              {user?.username}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-medium text-sm">
+                  {user?.username?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div className="text-sm text-gray-300">
+                {user?.username}
+              </div>
             </div>
             
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-all duration-200"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -96,7 +111,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800/50"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -106,7 +121,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-dark-700">
+        <div className="md:hidden bg-gray-900/95 backdrop-blur-sm border-t border-purple-500/20">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -116,10 +131,10 @@ const Navbar = () => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
                     isActive
-                      ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                      ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -129,23 +144,30 @@ const Navbar = () => {
             })}
           </div>
           
-          <div className="px-2 py-3 border-t border-gray-200 dark:border-dark-700">
+          <div className="px-2 py-3 border-t border-purple-500/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={toggleTheme}
-                  className="p-2 rounded-md text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                  className="p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-800/50"
                 >
                   {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
                 </button>
-                <span className="text-sm text-gray-600 dark:text-gray-300">
-                  {user?.username}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-medium text-sm">
+                      {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-300">
+                    {user?.username}
+                  </span>
+                </div>
               </div>
               
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
