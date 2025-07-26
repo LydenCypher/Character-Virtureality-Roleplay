@@ -267,6 +267,25 @@ async def verify_session(session_id: str) -> Optional[dict]:
         print(f"Session verification error: {e}")
         return None
 
+async def create_default_persona(user_id: str, username: str) -> str:
+    """Create a default persona for a new user"""
+    persona_id = str(uuid.uuid4())
+    default_persona = Persona(
+        persona_id=persona_id,
+        user_id=user_id,
+        name=username or "Me",
+        description=f"The default persona for {username or 'this user'}",
+        personality_traits="Friendly, curious, and engaging",
+        avatar=None,
+        preferences={},
+        is_default=True,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    
+    personas_collection.insert_one(default_persona.dict())
+    return persona_id
+
 async def get_current_user(x_session_id: str = Header(None)) -> Optional[dict]:
     """Get current user from session"""
     if not x_session_id:
