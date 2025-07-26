@@ -85,7 +85,7 @@ const Home = () => {
 
   const features = [
     {
-      icon: VrIcon,
+      icon: Glasses,
       title: 'VR Experience',
       description: 'Immersive virtual reality role-playing adventures',
       color: 'text-purple-400'
