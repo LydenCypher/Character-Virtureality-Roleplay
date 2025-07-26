@@ -104,12 +104,30 @@ class BackendTester:
             self.log_test("Get User", False, f"Get user error: {str(e)}")
             return False
     
-    def test_create_character(self):
-        """Test character creation"""
-        if "user_id" not in self.test_data:
-            self.log_test("Create Character", False, "No user_id available for character creation")
+    def test_auth_callback(self):
+        """Test auth callback endpoint with invalid session"""
+        try:
+            callback_data = {
+                "session_id": "test_invalid_session_123"
+            }
+            
+            response = requests.post(f"{BASE_URL}/auth/callback", 
+                                   json=callback_data, 
+                                   headers=HEADERS)
+            
+            # Should fail with 401 for invalid session
+            if response.status_code == 401:
+                self.log_test("Auth Callback (Invalid Session)", True, "Auth callback correctly rejected invalid session")
+                return True
+            else:
+                self.log_test("Auth Callback (Invalid Session)", False, f"Auth callback unexpected status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Auth Callback (Invalid Session)", False, f"Auth callback error: {str(e)}")
             return False
-        
+    
+    def test_create_character(self):
+        """Test character creation (should fail without authentication)"""
         try:
             character_data = {
                 "name": "Luna the Mystic",
@@ -122,28 +140,19 @@ class BackendTester:
                 "is_nsfw": False
             }
             
-            user_id = self.test_data["user_id"]
             response = requests.post(f"{BASE_URL}/characters", 
                                    json=character_data, 
-                                   params={"user_id": user_id},
                                    headers=HEADERS)
             
-            if response.status_code == 200:
-                data = response.json()
-                character_id = data.get("character_id")
-                if character_id:
-                    self.test_data["character_id"] = character_id
-                    self.test_data["character_name"] = character_data["name"]
-                    self.log_test("Create Character", True, f"Character created successfully: {character_data['name']} (ID: {character_id})")
-                    return True
-                else:
-                    self.log_test("Create Character", False, "Character creation response missing character_id")
-                    return False
+            # Should fail with 401 for missing authentication
+            if response.status_code == 401:
+                self.log_test("Create Character (No Auth)", True, "Character creation correctly requires authentication")
+                return True
             else:
-                self.log_test("Create Character", False, f"Character creation failed with status {response.status_code}: {response.text}")
+                self.log_test("Create Character (No Auth)", False, f"Character creation unexpected status {response.status_code}: {response.text}")
                 return False
         except Exception as e:
-            self.log_test("Create Character", False, f"Character creation error: {str(e)}")
+            self.log_test("Create Character (No Auth)", False, f"Character creation error: {str(e)}")
             return False
     
     def test_get_characters(self):
