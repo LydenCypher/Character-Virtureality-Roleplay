@@ -880,6 +880,7 @@ class BackendTester:
             ("Create User", self.test_create_user),
             ("Get User", self.test_get_user),
             ("Auth Callback (Invalid Session)", self.test_auth_callback),
+            ("AI Integration Direct", self.test_ai_integration_direct),  # New focused AI test
             ("Create Character (No Auth)", self.test_create_character),
             ("Get Characters", self.test_get_characters),
             ("Get Character by ID", self.test_get_character_by_id),
