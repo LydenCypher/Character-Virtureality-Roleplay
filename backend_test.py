@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 
 # Configuration
-BASE_URL = "http://localhost:8001/api"
+BASE_URL = "https://55fba44d-74fc-41dd-b35a-5d269f215d09.preview.emergentagent.com/api"
 HEADERS = {"Content-Type": "application/json"}
 
 class BackendTester:
