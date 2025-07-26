@@ -143,6 +143,7 @@ class ChatRequest(BaseModel):
     message: str
     ai_provider: Optional[str] = "openai"
     ai_model: Optional[str] = "gpt-4.1"
+    persona_id: Optional[str] = None
 
 class CreateCharacterRequest(BaseModel):
     name: str
