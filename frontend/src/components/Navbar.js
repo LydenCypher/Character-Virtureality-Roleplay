@@ -12,7 +12,7 @@ import {
   LogOut,
   Menu,
   X,
-  VrIcon,
+  Glasses,
   Gamepad2,
   Zap
 } from 'lucide-react';
