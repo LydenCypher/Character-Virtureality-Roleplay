@@ -383,6 +383,193 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=401, detail="Not authenticated")
     return current_user
 
+# Persona management
+@app.post("/api/personas")
+async def create_persona(persona_data: CreatePersonaRequest, current_user: dict = Depends(get_current_user)):
+    """Create a new persona for the current user"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona_id = str(uuid.uuid4())
+    
+    # If this is set as default, remove default from other personas
+    if persona_data.is_default:
+        personas_collection.update_many(
+            {"user_id": current_user["user_id"]},
+            {"$set": {"is_default": False}}
+        )
+    
+    persona = Persona(
+        persona_id=persona_id,
+        user_id=current_user["user_id"],
+        name=persona_data.name,
+        description=persona_data.description,
+        personality_traits=persona_data.personality_traits,
+        avatar=persona_data.avatar,
+        preferences=persona_data.preferences,
+        is_default=persona_data.is_default,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    
+    personas_collection.insert_one(persona.dict())
+    return {"persona_id": persona_id, "message": "Persona created successfully"}
+
+@app.get("/api/personas")
+async def get_user_personas(current_user: dict = Depends(get_current_user)):
+    """Get all personas for the current user"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    personas = list(personas_collection.find({"user_id": current_user["user_id"]}, {"_id": 0}).sort("created_at", -1))
+    return {"personas": personas}
+
+@app.get("/api/personas/{persona_id}")
+async def get_persona(persona_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a specific persona"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona = personas_collection.find_one({
+        "persona_id": persona_id,
+        "user_id": current_user["user_id"]
+    }, {"_id": 0})
+    
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona not found")
+    
+    return persona
+
+@app.put("/api/personas/{persona_id}")
+async def update_persona(persona_id: str, persona_data: UpdatePersonaRequest, current_user: dict = Depends(get_current_user)):
+    """Update a persona"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona = personas_collection.find_one({
+        "persona_id": persona_id,
+        "user_id": current_user["user_id"]
+    })
+    
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona not found")
+    
+    # Prepare update data
+    update_data = {"updated_at": datetime.utcnow()}
+    
+    if persona_data.name is not None:
+        update_data["name"] = persona_data.name
+    if persona_data.description is not None:
+        update_data["description"] = persona_data.description
+    if persona_data.personality_traits is not None:
+        update_data["personality_traits"] = persona_data.personality_traits
+    if persona_data.avatar is not None:
+        update_data["avatar"] = persona_data.avatar
+    if persona_data.preferences is not None:
+        update_data["preferences"] = persona_data.preferences
+    
+    # Handle default persona logic
+    if persona_data.is_default is not None:
+        if persona_data.is_default:
+            # Remove default from other personas
+            personas_collection.update_many(
+                {"user_id": current_user["user_id"], "persona_id": {"$ne": persona_id}},
+                {"$set": {"is_default": False}}
+            )
+        update_data["is_default"] = persona_data.is_default
+    
+    personas_collection.update_one(
+        {"persona_id": persona_id},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Persona updated successfully"}
+
+@app.delete("/api/personas/{persona_id}")
+async def delete_persona(persona_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a persona"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona = personas_collection.find_one({
+        "persona_id": persona_id,
+        "user_id": current_user["user_id"]
+    })
+    
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona not found")
+    
+    # Don't allow deleting the last persona
+    persona_count = personas_collection.count_documents({"user_id": current_user["user_id"]})
+    if persona_count <= 1:
+        raise HTTPException(status_code=400, detail="Cannot delete the last persona")
+    
+    # If deleting default persona, make another one default
+    if persona["is_default"]:
+        other_persona = personas_collection.find_one({
+            "user_id": current_user["user_id"],
+            "persona_id": {"$ne": persona_id}
+        })
+        if other_persona:
+            personas_collection.update_one(
+                {"persona_id": other_persona["persona_id"]},
+                {"$set": {"is_default": True}}
+            )
+    
+    personas_collection.delete_one({"persona_id": persona_id})
+    return {"message": "Persona deleted successfully"}
+
+@app.get("/api/personas/default")
+async def get_default_persona(current_user: dict = Depends(get_current_user)):
+    """Get the default persona for the current user"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona = personas_collection.find_one({
+        "user_id": current_user["user_id"],
+        "is_default": True
+    }, {"_id": 0})
+    
+    if not persona:
+        # If no default persona exists, return the first one and make it default
+        persona = personas_collection.find_one({"user_id": current_user["user_id"]}, {"_id": 0})
+        if persona:
+            personas_collection.update_one(
+                {"persona_id": persona["persona_id"]},
+                {"$set": {"is_default": True}}
+            )
+            persona["is_default"] = True
+    
+    return persona or {}
+
+@app.post("/api/personas/{persona_id}/set-default")
+async def set_default_persona(persona_id: str, current_user: dict = Depends(get_current_user)):
+    """Set a persona as the default"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    persona = personas_collection.find_one({
+        "persona_id": persona_id,
+        "user_id": current_user["user_id"]
+    })
+    
+    if not persona:
+        raise HTTPException(status_code=404, detail="Persona not found")
+    
+    # Remove default from all personas
+    personas_collection.update_many(
+        {"user_id": current_user["user_id"]},
+        {"$set": {"is_default": False}}
+    )
+    
+    # Set this persona as default
+    personas_collection.update_one(
+        {"persona_id": persona_id},
+        {"$set": {"is_default": True}}
+    )
+    
+    return {"message": "Default persona updated successfully"}
+
 # Character management
 @app.post("/api/characters")
 async def create_character(character_data: CreateCharacterRequest, current_user: dict = Depends(get_current_user)):
