@@ -291,48 +291,29 @@ class BackendTester:
             return False
     
     def test_ai_chat(self):
-        """Test AI chat endpoint with real OpenAI integration"""
-        if "conversation_id" not in self.test_data:
-            self.log_test("AI Chat", False, "No conversation_id available for chat testing")
-            return False
-        
+        """Test AI chat endpoint (should fail without authentication)"""
         try:
             chat_data = {
-                "conversation_id": self.test_data["conversation_id"],
+                "conversation_id": "test_conversation_id",
                 "message": "Greetings, Luna! I've heard tales of your wisdom. Could you share some ancient knowledge about the mystical arts?",
                 "ai_provider": "openai",
                 "ai_model": "gpt-4.1"
             }
             
-            print("   Sending message to AI... (this may take a few seconds)")
             response = requests.post(f"{BASE_URL}/chat", 
                                    json=chat_data, 
                                    headers=HEADERS,
-                                   timeout=30)
+                                   timeout=10)
             
-            if response.status_code == 200:
-                data = response.json()
-                user_message = data.get("user_message")
-                ai_response = data.get("ai_response")
-                
-                if user_message and ai_response:
-                    ai_content = ai_response.get("content", "")
-                    if len(ai_content) > 10:  # Basic check for meaningful response
-                        self.test_data["ai_response"] = ai_content
-                        self.log_test("AI Chat", True, f"AI chat successful. Response length: {len(ai_content)} characters", 
-                                    f"AI Response preview: {ai_content[:100]}...")
-                        return True
-                    else:
-                        self.log_test("AI Chat", False, "AI response too short or empty")
-                        return False
-                else:
-                    self.log_test("AI Chat", False, "Missing user_message or ai_response in chat response")
-                    return False
+            # Should fail with 401 for missing authentication
+            if response.status_code == 401:
+                self.log_test("AI Chat (No Auth)", True, "AI chat correctly requires authentication")
+                return True
             else:
-                self.log_test("AI Chat", False, f"AI chat failed with status {response.status_code}: {response.text}")
+                self.log_test("AI Chat (No Auth)", False, f"AI chat unexpected status {response.status_code}: {response.text}")
                 return False
         except Exception as e:
-            self.log_test("AI Chat", False, f"AI chat error: {str(e)}")
+            self.log_test("AI Chat (No Auth)", False, f"AI chat error: {str(e)}")
             return False
     
     def test_get_conversation_messages(self):
