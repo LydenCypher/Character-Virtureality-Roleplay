@@ -316,6 +316,78 @@ class BackendTester:
             self.log_test("AI Chat (No Auth)", False, f"AI chat error: {str(e)}")
             return False
     
+    def test_ai_integration_direct(self):
+        """Test AI integration components directly to verify OpenAI API key"""
+        try:
+            # Test if we can import and use the emergentintegrations library
+            import sys
+            sys.path.append('/app/backend')
+            
+            # Import the required modules
+            from emergentintegrations.llm.chat import LlmChat, UserMessage
+            import os
+            from dotenv import load_dotenv
+            
+            # Load environment variables
+            load_dotenv('/app/backend/.env')
+            api_key = os.environ.get('OPENAI_API_KEY')
+            
+            if not api_key:
+                self.log_test("AI Integration Direct", False, "OpenAI API key not found in environment")
+                return False
+            
+            if api_key == "your_openai_api_key_here":
+                self.log_test("AI Integration Direct", False, "OpenAI API key is placeholder value")
+                return False
+            
+            # Test creating an AI chat instance
+            system_prompt = "You are a helpful AI assistant. Respond briefly to test the connection."
+            chat_instance = LlmChat(
+                api_key=api_key,
+                session_id="test_session_direct",
+                system_message=system_prompt
+            ).with_model("openai", "gpt-4o-mini")  # Use a more reliable model for testing
+            
+            # Send a simple test message
+            user_msg = UserMessage(text="Hello! This is a test message. Please respond with 'Connection successful!'")
+            
+            print("   Testing direct AI connection with OpenAI...")
+            import asyncio
+            
+            async def test_ai_call():
+                try:
+                    response = await chat_instance.send_message(user_msg)
+                    return response
+                except Exception as e:
+                    return f"Error: {str(e)}"
+            
+            # Run the async test
+            response = asyncio.run(test_ai_call())
+            
+            if isinstance(response, str) and len(response) > 5 and "Error:" not in response:
+                self.log_test("AI Integration Direct", True, f"OpenAI API connection successful", 
+                            f"AI Response: {response[:100]}...")
+                return True
+            elif "Error:" in str(response):
+                error_msg = str(response)
+                if "quota" in error_msg.lower() or "billing" in error_msg.lower():
+                    self.log_test("AI Integration Direct", False, f"OpenAI API quota/billing issue: {error_msg}")
+                elif "invalid" in error_msg.lower() and "key" in error_msg.lower():
+                    self.log_test("AI Integration Direct", False, f"Invalid OpenAI API key: {error_msg}")
+                else:
+                    self.log_test("AI Integration Direct", False, f"OpenAI API error: {error_msg}")
+                return False
+            else:
+                self.log_test("AI Integration Direct", False, f"Unexpected AI response: {response}")
+                return False
+                
+        except ImportError as e:
+            self.log_test("AI Integration Direct", False, f"Failed to import AI libraries: {str(e)}")
+            return False
+        except Exception as e:
+            self.log_test("AI Integration Direct", False, f"AI integration test error: {str(e)}")
+            return False
+    
     def test_get_conversation_messages(self):
         """Test getting conversation messages"""
         if "conversation_id" not in self.test_data:
