@@ -276,7 +276,7 @@ const Home = () => {
                         {conversation.title}
                       </h3>
                       <p className="text-sm text-gray-400">
-                        {new Date(conversation.created_at).toLocaleDateString()}
+                        {conversation.created_at ? new Date(conversation.created_at).toLocaleDateString() : 'Recent'}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
