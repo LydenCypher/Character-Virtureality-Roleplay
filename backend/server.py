@@ -812,12 +812,49 @@ async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_curre
         ai_provider = chat_request.ai_provider or "openai"
         ai_model = chat_request.ai_model or "gpt-4.1"
         
+        # Save user message first
+        user_message_id = str(uuid.uuid4())
+        user_message = Message(
+            message_id=user_message_id,
+            conversation_id=chat_request.conversation_id,
+            room_id=chat_request.room_id,
+            sender="user",
+            sender_id=current_user["user_id"],
+            content=chat_request.message,
+            timestamp=datetime.utcnow()
+        )
+        messages_collection.insert_one(user_message.dict())
+        
         # Get API key
         api_key = get_api_key(ai_provider)
         if not api_key:
-            raise HTTPException(status_code=400, detail=f"API key not configured for {ai_provider}")
+            # Return a mock response when no API key is available
+            ai_message_id = str(uuid.uuid4())
+            mock_response = f"Hello! I'm {character['name']}. I'd love to chat with you, but the AI service isn't configured yet. Please add your API keys to enable full AI functionality!"
+            
+            ai_message = Message(
+                message_id=ai_message_id,
+                conversation_id=chat_request.conversation_id,
+                room_id=chat_request.room_id,
+                sender="character",
+                sender_id=character["character_id"],
+                content=mock_response,
+                timestamp=datetime.utcnow(),
+                ai_provider=ai_provider,
+                ai_model=ai_model
+            )
+            messages_collection.insert_one(ai_message.dict())
+            
+            return {
+                "user_message": user_message.dict(),
+                "ai_response": ai_message.dict(),
+                "ai_provider": ai_provider,
+                "ai_model": ai_model,
+                "persona_used": persona,
+                "note": "Mock response - API key not configured"
+            }
         
-        # Save user message
+        # Continue with normal AI processing
         user_message_id = str(uuid.uuid4())
         user_message = Message(
             message_id=user_message_id,
