@@ -369,11 +369,6 @@ async def phone_auth(phone_number: str):
     # This would integrate with a service like Twilio for SMS verification
     return {"message": "Phone authentication not implemented yet", "phone_number": phone_number}
 
-@app.get("/api/auth/discord")
-async def discord_auth():
-    """Redirect to Discord OAuth"""
-    # This would redirect to Discord OAuth
-    return {"url": "https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=identify email"}
 
 @app.get("/api/auth/google")
 async def google_auth():
