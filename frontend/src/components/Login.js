@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import VRBackground from './VRBackground';
+import './VRBackground.css';
 import { 
   MessageCircle, 
   User, 
