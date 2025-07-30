@@ -855,18 +855,6 @@ async def chat(chat_request: ChatRequest, current_user: dict = Depends(get_curre
             }
         
         # Continue with normal AI processing
-        user_message_id = str(uuid.uuid4())
-        user_message = Message(
-            message_id=user_message_id,
-            conversation_id=chat_request.conversation_id,
-            room_id=chat_request.room_id,
-            sender="user",
-            sender_id=current_user["user_id"],
-            content=chat_request.message,
-            timestamp=datetime.utcnow()
-        )
-        messages_collection.insert_one(user_message.dict())
-        
         # Create system prompt based on character, mode, and persona
         mode = "casual"  # Default mode
         if not chat_request.room_id:
