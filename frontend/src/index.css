@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import VR Background styles */
+@import url('./components/VRBackground.css');
+
 /* Custom styles for AI Character Interaction App */
 body {
   margin: 0;
