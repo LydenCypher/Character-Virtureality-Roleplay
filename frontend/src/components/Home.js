@@ -273,15 +273,15 @@ const Home = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium text-white">
-                        {conversation.title}
+                        {conversation?.title || 'Untitled Chat'}
                       </h3>
                       <p className="text-sm text-gray-400">
-                        {conversation.created_at ? new Date(conversation.created_at).toLocaleDateString() : 'Recent'}
+                        {conversation?.created_at ? new Date(conversation.created_at).toLocaleDateString() : 'Recent'}
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded">
-                        {conversation.mode}
+                        {conversation?.mode || 'casual'}
                       </span>
                       <MessageCircle className="w-4 h-4 text-gray-400" />
                     </div>
