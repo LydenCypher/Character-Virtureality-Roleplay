@@ -208,11 +208,12 @@ class UpdatePersonaRequest(BaseModel):
 def get_api_key(provider: str) -> str:
     """Get API key for the specified provider"""
     if provider == "openai":
-        return OPENAI_API_KEY
+        return OPENAI_API_KEY if OPENAI_API_KEY and OPENAI_API_KEY != "demo_key_placeholder" else None
     elif provider == "anthropic":
-        return ANTHROPIC_API_KEY
+        return ANTHROPIC_API_KEY if ANTHROPIC_API_KEY and ANTHROPIC_API_KEY != "demo_key_placeholder" else None
     elif provider == "gemini":
-        return os.environ.get('GEMINI_API_KEY')
+        key = os.environ.get('GEMINI_API_KEY')
+        return key if key and key != "demo_key_placeholder" else None
     return None
 
 def create_character_system_prompt(character: dict, mode: str = "casual", persona: Optional[dict] = None) -> str:
