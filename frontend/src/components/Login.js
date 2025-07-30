@@ -85,13 +85,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 cyber-grid"></div>
+      {/* VR Background Component */}
+      <VRBackground />
       
-      {/* Floating elements */}
-      <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500 rounded-full opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-24 h-24 bg-blue-500 rounded-full opacity-20 animate-pulse" style={{animationDelay: '1s'}}></div>
-      <div className="absolute top-1/2 left-10 w-16 h-16 bg-indigo-500 rounded-full opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+      {/* Additional floating elements for depth */}
+      <div className="absolute top-20 left-20 w-32 h-32 bg-purple-500 rounded-full opacity-10 animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-24 h-24 bg-blue-500 rounded-full opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
+      <div className="absolute top-1/2 left-10 w-16 h-16 bg-indigo-500 rounded-full opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
       
       {/* Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
