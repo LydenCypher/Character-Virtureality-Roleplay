@@ -39,9 +39,9 @@ const Home = () => {
         axios.get(`${backendUrl}/api/rooms?limit=6`)
       ]);
 
-      setRecentConversations(conversationsRes.data.conversations.slice(0, 5));
-      setCharacters(charactersRes.data.characters);
-      setMultiplayerRooms(roomsRes.data.rooms || []);
+      setRecentConversations((conversationsRes.data?.conversations || []).slice(0, 5));
+      setCharacters(charactersRes.data?.characters || []);
+      setMultiplayerRooms(roomsRes.data?.rooms || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
