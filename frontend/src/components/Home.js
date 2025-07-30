@@ -331,31 +331,31 @@ const Home = () => {
                   onClick={() => startNewConversation(character.character_id)}
                 >
                   <div className="flex items-center space-x-3 mb-3">
-                    {character.avatar ? (
+                    {character?.avatar ? (
                       <img
                         src={character.avatar}
-                        alt={character.name}
+                        alt={character?.name || 'Character'}
                         className="w-12 h-12 rounded-full object-cover border-2 border-purple-500/30"
                       />
                     ) : (
                       <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium">
-                          {character.name.charAt(0).toUpperCase()}
+                          {character?.name?.charAt(0)?.toUpperCase() || '?'}
                         </span>
                       </div>
                     )}
                     <div>
                       <h3 className="font-medium text-white group-hover:text-purple-300 transition-colors">
-                        {character.name}
+                        {character?.name || 'Unnamed Character'}
                       </h3>
                       <p className="text-xs text-gray-400 flex items-center space-x-1">
                         <Brain className="w-3 h-3" />
-                        <span>{character.ai_provider}</span>
+                        <span>{character?.ai_provider || 'Unknown'}</span>
                       </p>
                     </div>
                   </div>
                   <p className="text-sm text-gray-300 mb-2 line-clamp-2">
-                    {character.description}
+                    {character?.description || 'No description available'}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
