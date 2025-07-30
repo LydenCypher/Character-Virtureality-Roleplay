@@ -227,17 +227,17 @@ const Home = () => {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-white">
-                      {room.name}
+                      {room?.name || 'Unnamed Room'}
                     </h3>
                     <div className="flex items-center space-x-1">
                       <Users className="w-4 h-4 text-purple-400" />
                       <span className="text-sm text-gray-400">
-                        {room.participants.length}/{room.max_participants}
+                        {room?.participants?.length || 0}/{room?.max_participants || 10}
                       </span>
                     </div>
                   </div>
                   <p className="text-sm text-gray-300 mb-3">
-                    {room.description}
+                    {room?.description || 'No description available'}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
